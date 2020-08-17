@@ -9,6 +9,7 @@ public enum  ResourceType {
     simText("simTextConvertServiceImpl"),
     file("fileConvertServiceImpl"),
     http("httpImpl"),
+    redis("redisConvertServiceImpl"),
     html("htmlImpl");
     ResourceType(String instanceName){
         this.instanceName=instanceName;

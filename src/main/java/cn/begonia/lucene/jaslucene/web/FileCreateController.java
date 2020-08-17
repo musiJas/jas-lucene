@@ -1,6 +1,7 @@
 package cn.begonia.lucene.jaslucene.web;
 
 import cn.begonia.lucene.jaslucene.common.ResourceType;
+import cn.begonia.lucene.jaslucene.config.ContextProperties;
 import cn.begonia.lucene.jaslucene.resourece.FileResource;
 import cn.begonia.lucene.jaslucene.service.LuceneDocumentService;
 import cn.begonia.lucene.jaslucene.service.LuceneReaderService;
@@ -26,13 +27,16 @@ public class FileCreateController {
     private LuceneReaderService   luceneReaderService;
 
     String  resourcePath="D:\\data\\text";
-    String  index="D:\\data\\index";
+    //String  index="D:\\data\\index";
+
+    @Autowired
+    ContextProperties  properties;
 
     @RequestMapping("/createIndex")
     public JSONObject  createIndex(){
         FileResource  resource=new FileResource();
         resource.setType(ResourceType.file);
-        resource.setIndexPath(index);
+        resource.setIndexPath(properties.getIndexPath());
         resource.setResourcePath(resourcePath);
         luceneWriterService.createIndex(resource);
         return  null;
@@ -42,8 +46,8 @@ public class FileCreateController {
     public JSONObject  queryObject(String field,String content){
         long  startTime=System.currentTimeMillis();
         FileResource  resource=new FileResource();
-        resource.setIndexPath(index);
-        luceneReaderService.openResource(index);
+        resource.setIndexPath(properties.getIndexPath());
+        luceneReaderService.openResource(properties.getIndexPath());
         luceneReaderService.termQuery(field,content);
         luceneReaderService.closeReader();
         long  endTime=System.currentTimeMillis();

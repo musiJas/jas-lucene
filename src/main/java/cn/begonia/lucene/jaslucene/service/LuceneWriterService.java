@@ -30,7 +30,7 @@ public class LuceneWriterService {
     @Autowired
     private ResourceFactory  resourceFactory;
 
-    public  void  openResource(String  indexPath){
+    public  void   openResource(String  indexPath){
         try {
             fsDirectory= FSDirectory.open(new File(indexPath));
             IKAnalyzer ikAnalyzer=new IKAnalyzer();
