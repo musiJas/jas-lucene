@@ -2,7 +2,9 @@ package cn.begonia.lucene.jaslucene.demo;
 
 import cn.begonia.lucene.jaslucene.util.FileUtil;
 import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
+import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.document.*;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexWriter;
@@ -25,7 +27,7 @@ public class demo1 {
     public static void main(String[] args) throws FileNotFoundException {
         String  resource="D:\\data\\text";
         String  index="D:\\data\\index";
-        String  key="秦国";
+        String  key="分布式";
         queryIndex(index,key);
 
        /* try {
@@ -43,21 +45,23 @@ public class demo1 {
             Directory  directory=FSDirectory.open(new File(indexPath));
             DirectoryReader dr=DirectoryReader.open(directory);
             IndexSearcher  indexSearcher=new IndexSearcher(dr);
-            Query query=new TermQuery(new Term("fileContent",key));
-            TopDocs docs= indexSearcher.search(query,10);
+            Query query=new TermQuery(new Term("titles",key));
+
+
+         /*   TopDocs docs= indexSearcher.search(query,10);
             System.out.println("docs.size="+docs.scoreDocs.length);
             for(ScoreDoc doc:docs.scoreDocs){
                 int  index=doc.doc;
                 Document document=indexSearcher.doc(index);
-                String fileName=document.get("fileName");
-                System.out.println("fileName="+fileName);
-                String fileSize=document.get("fileSize");
-                System.out.println("fileSize="+fileSize);
-                String filePath=document.get("filePath");
-                System.out.println("filePath="+filePath);
-                String  content=document.get("fileContent");
+                String fileName=document.get("urls");
+                System.out.println("urls="+fileName);
+                String fileSize=document.get("auths");
+                System.out.println("auths="+fileSize);
+                String filePath=document.get("dates");
+                System.out.println("dates="+filePath);
+                String  content=document.get("content");
                 System.out.println("content="+content);
-            }
+            }*/
             dr.close();
         } catch (IOException e) {
             e.printStackTrace();
@@ -66,7 +70,32 @@ public class demo1 {
         return "";
     }
 
-
+    /**
+     * 分词查找
+     * @param analyzer   选用的分词器
+     * @param field  要分词查询的关键字
+     * */
+    public  static void   analyzerQuery(Analyzer analyzer,String field,String  content){
+        TokenStream tokenStream=null;
+        try {
+            tokenStream=analyzer.tokenStream(field,new StringReader(content));
+            CharTermAttribute charTermAttribute=tokenStream.addAttribute(CharTermAttribute.class);
+            tokenStream.reset();
+            while(tokenStream.incrementToken()){
+                System.out.println(charTermAttribute.toString());
+            }
+            tokenStream.end();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }finally {
+            try {
+                tokenStream.close();
+                analyzer.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
 
     public   static  void  createIndex(String indexPath,String  resourcePath) throws IOException {
          Directory   dir=FSDirectory.open(new File(indexPath));

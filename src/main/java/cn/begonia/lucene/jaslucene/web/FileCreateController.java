@@ -1,17 +1,18 @@
 package cn.begonia.lucene.jaslucene.web;
 
+import cn.begonia.lucene.jaslucene.common.CacheType;
 import cn.begonia.lucene.jaslucene.common.ResourceType;
 import cn.begonia.lucene.jaslucene.config.ContextProperties;
 import cn.begonia.lucene.jaslucene.resourece.FileResource;
-import cn.begonia.lucene.jaslucene.service.LuceneDocumentService;
-import cn.begonia.lucene.jaslucene.service.LuceneReaderService;
-import cn.begonia.lucene.jaslucene.service.LuceneWriterService;
+import cn.begonia.lucene.jaslucene.service.handler.LuceneReaderService;
+import cn.begonia.lucene.jaslucene.service.handler.LuceneWriterService;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.io.File;
 
 /**
  * @author begonia_chen
@@ -45,9 +46,10 @@ public class FileCreateController {
     @RequestMapping("/query")
     public JSONObject  queryObject(String field,String content){
         long  startTime=System.currentTimeMillis();
-        FileResource  resource=new FileResource();
-        resource.setIndexPath(properties.getIndexPath());
-        luceneReaderService.openResource(properties.getIndexPath());
+       /* FileResource  resource=new FileResource();
+        resource.setIndexPath(properties.getIndexPath());*/
+        String  cacheType= CacheType.cnblogs.getKey();
+        luceneReaderService.openResource(properties.getIndexPath()+ File.separator+cacheType);
         luceneReaderService.termQuery(field,content);
         luceneReaderService.closeReader();
         long  endTime=System.currentTimeMillis();

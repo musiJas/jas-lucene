@@ -1,8 +1,11 @@
-package cn.begonia.lucene.jaslucene.service;
+package cn.begonia.lucene.jaslucene.service.handler;
 
+import cn.begonia.lucene.jaslucene.common.Result;
+import cn.begonia.lucene.jaslucene.famatter.parser.RangeParser;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.TokenStream;
+import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.*;
@@ -38,21 +41,31 @@ public class LuceneReaderService {
     private IndexSearcher indexSearcher;
 
     /** 新增查询数据 **/
-    public void  executeQuery(Query  query,int item){
-        querySearch(query,item);
+    public Result  executeQuery(Query  query,int item){
+        return querySearch(query,item);
     }
 
-    public  void  executeQuery(Query query){
-        querySearch(query,100);
+    public  Result   executeQuery(Query query){
+        return querySearch(query,100);
     }
 
+    /**
+     * 表达式范围查询
+     * @field
+     * @param  expression 表达式
+     * */
+    public    Result  numericQuery(String field,String expression) throws ParseException {
+        RangeParser parser=new RangeParser(Version.LUCENE_CURRENT,field,new StandardAnalyzer(Version.LUCENE_CURRENT));
+        Query  query=parser.parse(expression);
+        return executeQuery(query);
+    }
 
     /**
      * 执行查询，并打印查询到的记录数
      * @param query
      * @throws IOException
      */
-    public  void  querySearch(Query query,int total){
+    public  Result  querySearch(Query query,int total){
         try {
             TopDocs topDocs = indexSearcher.search(query, total);
             //打印查询到的记录数
@@ -79,6 +92,7 @@ public class LuceneReaderService {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        return Result.isOk();
     }
 
 
@@ -114,16 +128,16 @@ public class LuceneReaderService {
      * @param key  field
      * @param value  condition
      * **/
-    public  void  termQuery(String key,String value){
+    public  Result  termQuery(String key,String value){
         TermQuery  query=new TermQuery(new Term(key,value));
-        executeQuery(query);
+        return executeQuery(query);
     }
 
     /**
      * method
      * **/
-    public   void  termQuery(Term  term){
-        executeQuery(new TermQuery(term));
+    public   Result  termQuery(Term  term){
+       return executeQuery(new TermQuery(term));
     }
 
     /***
@@ -134,16 +148,16 @@ public class LuceneReaderService {
      * BooleanQuery本身来讲是一个布尔子句的容器，它提供了专门的API方法往其中添加子句，
      * 并标明它们之间的关系，以下代码为BooleanQuery提供的用于添加子句的API接口：
      */
-    public  void   multipleQuery(Map<String,Object> map){
+    public  Result   multipleQuery(Map<String,Object> map){
         List<Term> list=new ArrayList<>();
         for(Map.Entry<String,Object> ty:map.entrySet()){
             Term term=new Term(ty.getKey(),String.valueOf(ty.getValue()));
             list.add(term);
         }
-        multipleQuery(list);
+        return  multipleQuery(list);
     }
 
-    public  void   multipleQuery(List<Term> list){
+    public  Result   multipleQuery(List<Term> list){
         // BooleanClause用于表示布尔查询子句关系的类，
         // 包 括：
         // BooleanClause.Occur.MUST，
@@ -161,7 +175,7 @@ public class LuceneReaderService {
         for(Term term:list){
             booleanQuery.add(new TermQuery(term), BooleanClause.Occur.SHOULD);
         }
-        executeQuery(booleanQuery);
+        return executeQuery(booleanQuery);
     }
 
     /**
@@ -170,9 +184,9 @@ public class LuceneReaderService {
      * PrefixQuery用于匹配其索引开始以指定的字符串的文档。就是文档中存在xxx%
      * <p>
      * **/
-    public  void  prefixQuery(String key ,Object value){
+    public  Result  prefixQuery(String key ,Object value){
         Query query=new PrefixQuery(new Term(key,String.valueOf(value)));
-        executeQuery(query);
+        return executeQuery(query);
     }
 
 
@@ -185,13 +199,13 @@ public class LuceneReaderService {
      * 那么就无法匹配成功了，如果也想让这个匹配，就需要设定slop，
      * 先给出slop的概念：slop是指两个项的位置之间允许的最大间隔距离
      * **/
-    public  void phraseQuery(String key,List<Object> list,int  slop){
+    public  Result phraseQuery(String key,List<Object> list,int  slop){
         PhraseQuery  phraseQuery=new PhraseQuery();
         for(Object obj:list){
             phraseQuery.add(new Term(key,String.valueOf(obj)));
         }
         phraseQuery.setSlop(slop);
-        executeQuery(phraseQuery);
+        return  executeQuery(phraseQuery);
     }
 
     /**
@@ -200,9 +214,9 @@ public class LuceneReaderService {
      * FuzzyQuery是一种模糊查询，它可以简单地识别两个相近的词语。
      *
      * **/
-    public  void  fuzzyQuery(String key,String value){
+    public  Result  fuzzyQuery(String key,String value){
         FuzzyQuery  fuzzyQuery=new FuzzyQuery(new Term(key,value));
-        executeQuery(fuzzyQuery);
+        return executeQuery(fuzzyQuery);
     }
 
     /**
@@ -212,37 +226,53 @@ public class LuceneReaderService {
      * 通配符“?”代表1个字符，而“*”则代表0至多个字符。
      *
      * */
-     public  void  wildcardQuery(String  key,String  wildcard){
+     public  Result  wildcardQuery(String  key,String  wildcard){
          WildcardQuery  wildcardQuery=new WildcardQuery(new Term(key,wildcard));
-         executeQuery(wildcardQuery);
+         return  executeQuery(wildcardQuery);
      }
+
+     /**
+      * 范围查询
+      * field 字段
+      * start 开始位置
+      * end  结束位置
+      * iSBlow 是否含低
+      * isCell 是否含顶
+      * **/
+     public  Result  numericRangeQuery(String  field,int start,int end ,boolean  isBlow,boolean  isCell){
+         Query  query= NumericRangeQuery.newIntRange(field,start,end,isBlow,isCell);
+         return executeQuery(query);
+     }
+
 
      /**
       * 分词查询
       * **/
-    public  void    analyzerParseQuery(String field,String  content){
+    public  Result    analyzerParseQuery(String field,String  content){
         IKAnalyzer  ikAnalyzer=new IKAnalyzer();
         QueryParser  queryParser=new QueryParser(Version.LUCENE_CURRENT,field,ikAnalyzer);
         try {
             Query  query=queryParser.parse(content);
-            executeQuery(query);
+            return executeQuery(query);
         } catch (ParseException e) {
             e.printStackTrace();
         }
+        return Result.isFail();
     }
 
     /**
      * 多分词查询
      * **/
-    public   void   multiFieldQueryParser(String[] fields,String content){
+    public Result  multiFieldQueryParser(String[] fields, String content){
         IKAnalyzer  ikAnalyzer=new IKAnalyzer();
         MultiFieldQueryParser  multiFieldQueryParser=new MultiFieldQueryParser(Version.LUCENE_CURRENT,fields,ikAnalyzer);
         try {
             Query query=multiFieldQueryParser.parse(content);
-            executeQuery(query);
+            return executeQuery(query);
         } catch (ParseException e) {
             e.printStackTrace();
         }
+        return Result.isOk();
     }
 
     /**

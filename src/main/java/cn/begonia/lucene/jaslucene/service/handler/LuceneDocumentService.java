@@ -1,4 +1,4 @@
-package cn.begonia.lucene.jaslucene.service;
+package cn.begonia.lucene.jaslucene.service.handler;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.lucene.analysis.Analyzer;

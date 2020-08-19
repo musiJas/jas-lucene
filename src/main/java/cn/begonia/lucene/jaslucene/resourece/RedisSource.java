@@ -13,4 +13,5 @@ public class RedisSource extends  ResourceAttribute {
     private  String  key; // 需要建立索引的key
 
 
+
 }

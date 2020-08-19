@@ -1,4 +1,4 @@
-package cn.begonia.lucene.jaslucene.service;
+package cn.begonia.lucene.jaslucene.service.handler;
 
 import cn.begonia.lucene.jaslucene.resourece.ResourceAttribute;
 import org.apache.lucene.document.Document;

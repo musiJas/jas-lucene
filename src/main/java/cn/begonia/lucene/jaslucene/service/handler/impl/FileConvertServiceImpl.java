@@ -1,8 +1,8 @@
-package cn.begonia.lucene.jaslucene.service.impl;
+package cn.begonia.lucene.jaslucene.service.handler.impl;
 
 import cn.begonia.lucene.jaslucene.resourece.FileResource;
 import cn.begonia.lucene.jaslucene.resourece.ResourceAttribute;
-import cn.begonia.lucene.jaslucene.service.DocumentConvert;
+import cn.begonia.lucene.jaslucene.service.handler.DocumentConvert;
 import cn.begonia.lucene.jaslucene.util.FileUtil;
 import org.apache.lucene.document.*;
 import org.apache.lucene.index.IndexWriter;

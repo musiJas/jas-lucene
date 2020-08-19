@@ -1,7 +1,7 @@
 package cn.begonia.lucene.jaslucene.common;
 
 import cn.begonia.lucene.jaslucene.resourece.ResourceAttribute;
-import cn.begonia.lucene.jaslucene.service.DocumentConvert;
+import cn.begonia.lucene.jaslucene.service.handler.DocumentConvert;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 

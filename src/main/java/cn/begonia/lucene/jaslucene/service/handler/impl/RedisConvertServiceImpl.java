@@ -1,18 +1,20 @@
-package cn.begonia.lucene.jaslucene.service.impl;
+package cn.begonia.lucene.jaslucene.service.handler.impl;
 
+import cn.begonia.lucene.jaslucene.famatter.LuceneFormatter;
 import cn.begonia.lucene.jaslucene.resourece.RedisSource;
 import cn.begonia.lucene.jaslucene.resourece.ResourceAttribute;
-import cn.begonia.lucene.jaslucene.service.DocumentConvert;
+import cn.begonia.lucene.jaslucene.service.handler.DocumentConvert;
 import cn.begonia.lucene.jaslucene.util.CacheUtils;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
-import org.apache.lucene.document.StringField;
 import org.apache.lucene.index.IndexWriter;
+import org.apache.lucene.index.Term;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.wltea.analyzer.lucene.IKAnalyzer;
 
 import java.io.IOException;
 import java.util.Map;
@@ -43,14 +45,20 @@ public class RedisConvertServiceImpl implements DocumentConvert  {
     public  void   createIndex(IndexWriter indexWriter,Map<Object,Object> map)   {
         Document doc=null;
         for(Map.Entry<Object,Object> ty:map.entrySet()){
+            String key=String.valueOf(ty.getKey());
             JSONObject obj=JSONObject.parseObject(String.valueOf(ty.getValue()));
+            doc=new Document();
+            doc.add(new Field("id",key, Field.Store.YES, Field.Index.NOT_ANALYZED));
             for(Map.Entry<String, Object> ob:obj.entrySet()){
-                doc=new Document();
-                Field field = new StringField(ob.getKey(), String.valueOf(ob.getValue()), Field.Store.YES);
-                doc.add(field);
+                //Field field = new TextField(ob.getKey(), String.valueOf(ob.getValue()), Field.Store.YES);
+                doc.add(LuceneFormatter.initialFormatter(ob.getKey(),String.valueOf(ob.getValue())));
             }
             try {
-                indexWriter.addDocument(doc);
+                IKAnalyzer  ikAnalyzer=new IKAnalyzer(true);
+                System.out.println(key);
+                Term  term=new Term("id",key);
+                indexWriter.updateDocument(term,doc,ikAnalyzer);
+                //indexWriter.addDocument(doc);
             } catch (IOException e) {
                 log.debug("key "+ty.getKey()+"建立索引失败...");
             }

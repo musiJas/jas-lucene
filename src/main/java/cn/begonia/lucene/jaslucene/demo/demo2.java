@@ -1,13 +1,16 @@
 package cn.begonia.lucene.jaslucene.demo;
 
-import org.apache.lucene.document.Document;
-import org.apache.lucene.document.Field;
-import org.apache.lucene.document.StoredField;
-import org.apache.lucene.document.TextField;
+import cn.begonia.lucene.jaslucene.famatter.parser.RangeParser;
+import cn.begonia.lucene.jaslucene.util.DateUtils;
+import org.apache.lucene.analysis.ar.ArabicAnalyzer;
+import org.apache.lucene.analysis.core.SimpleAnalyzer;
+import org.apache.lucene.analysis.standard.StandardAnalyzer;
+import org.apache.lucene.document.*;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.index.Term;
+import org.apache.lucene.queryparser.classic.MultiFieldQueryParser;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.*;
@@ -19,22 +22,111 @@ import org.wltea.analyzer.lucene.IKAnalyzer;
 import java.io.*;
 
 public class demo2 {
-    public static void main(String[] args) throws FileNotFoundException {
+    private  static  String  indexStaticPath="D:\\data\\index\\cnblogs";
+
+    public static void main(String[] args) throws FileNotFoundException, ParseException, java.text.ParseException {
         String  resource="D:\\data\\text";
         String  index="D:\\data\\index";
-        String  key="差矣";
-        long  startTime= System.currentTimeMillis();
-        queryIndex(index,key);
+        String  key="date";
+        //String  value="date:[2020-08-18 TO 2020-08-19]";
+        String  value="like:[10 TO 100]";
 
-      /*  try {
+        long  startTime= System.currentTimeMillis();
+        String contentTitle="title";
+        String  content="小坏先生";
+        //String  content="title:codermy";
+        String [] multi={"title","content","auth","focus"};
+        multiFieldQueryParser(multi,content);
+        //queryStringResult(contentTitle,content);
+       // queryIndex(index,key);
+        queryNumericResult(key,value);
+        /*try {
             createIndex(index,resource);
         } catch (IOException e) {
             e.printStackTrace();
         }*/
         long  endTime= System.currentTimeMillis();
         System.out.println("总共耗时："+(endTime-startTime));
-        //System.out.println(getStringByFile(new File(resource)));
     }
+
+    /****/
+
+    /**
+     * 多分词查询
+     * **/
+    public  static void   multiFieldQueryParser(String[] fields,String content){
+        IKAnalyzer  ikAnalyzer=new IKAnalyzer();
+        SimpleAnalyzer simpleAnalyzer=new SimpleAnalyzer(Version.LUCENE_CURRENT);
+        ArabicAnalyzer arabicAnalyzer=new ArabicAnalyzer(Version.LUCENE_47);
+        MultiFieldQueryParser multiFieldQueryParser=new MultiFieldQueryParser(Version.LUCENE_CURRENT,fields,ikAnalyzer);
+        try {
+            Query query=multiFieldQueryParser.parse(content);
+            executeQuery(query);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    public static  void  queryStringResult(String field,String value) throws ParseException {
+        QueryParser  parser=new QueryParser(Version.LUCENE_35,field,new SimpleAnalyzer(Version.LUCENE_35));
+        Query  query=parser.parse(value);
+        executeQuery(query);
+    }
+
+    public  static  String  queryNumericResult(String field,String value) throws ParseException, java.text.ParseException {
+        RangeParser parser=new RangeParser(Version.LUCENE_35,field,new StandardAnalyzer(Version.LUCENE_35));
+        Query  query=parser.parse(value);
+        executeQuery(query);
+        return "";
+    }
+
+    public static  void  executeQuery(Query query){
+        try {
+            Directory directory= FSDirectory.open(new File(indexStaticPath));
+            DirectoryReader dr=DirectoryReader.open(directory);
+            IndexSearcher indexSearcher=new IndexSearcher(dr);
+       /*     IKAnalyzer  ik=new IKAnalyzer();
+            ArabicAnalyzer   arabicAnalyzer=new ArabicAnalyzer(Version.LUCENE_CURRENT);
+            BooleanQuery  bq=new BooleanQuery();
+            QueryParser  qp=new QueryParser(Version.LUCENE_CURRENT,"title",new SimpleAnalyzer(Version.LUCENE_CURRENT));
+            Query  query1=new TermQuery(new Term("titles",key));
+            Query  query=qp.parse(key);
+            bq.add(query, BooleanClause.Occur.MUST);
+            bq.add(query1, BooleanClause.Occur.MUST);*/
+            TopDocs docs= indexSearcher.search(query,10000);
+            System.out.println("docs.size="+docs.scoreDocs.length);
+            for(ScoreDoc doc:docs.scoreDocs){
+                Explanation  explanation=indexSearcher.explain(query,doc.doc);
+                System.out.println(explanation.toString());
+                int  index=doc.doc;
+                Document document=indexSearcher.doc(index);
+                String titles=document.get("title");
+                System.out.println("title="+titles);
+                String urls=document.get("url");
+                System.out.println("url="+urls);
+                String auths=document.get("auth");
+                System.out.println("auth="+auths);
+                String dates=document.get("date");
+                System.out.println("date="+ DateUtils.parseTimeMillis(dates));
+                String  digs=document.get("like");
+                System.out.println("dig="+digs);
+                String  comments=document.get("comment");
+                System.out.println("comment="+comments);
+                String  browse=document.get("browse");
+                System.out.println("browse="+browse);
+                String  content=document.get("content");
+                System.out.println("content="+content);
+                String  img=document.get("img");
+                System.out.println("img="+img);
+            }
+            dr.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        System.out.println("查找完成");
+    }
+
 
     @SuppressWarnings("all")
     public  static  String  queryIndex(String  indexPath,String key){
@@ -43,26 +135,44 @@ public class demo2 {
             DirectoryReader dr=DirectoryReader.open(directory);
             IndexSearcher indexSearcher=new IndexSearcher(dr);
             IKAnalyzer  ik=new IKAnalyzer();
-            QueryParser  qp=new QueryParser(Version.LUCENE_47,"fileContent",ik);
 
-            //Query query=new TermQuery(new Term("fileContent",key));
+            ArabicAnalyzer   arabicAnalyzer=new ArabicAnalyzer(Version.LUCENE_CURRENT);
+            BooleanQuery  bq=new BooleanQuery();
+            QueryParser  qp=new QueryParser(Version.LUCENE_CURRENT,"title",new SimpleAnalyzer(Version.LUCENE_CURRENT));
+
+
+            Query  query1=new TermQuery(new Term("titles",key));
             Query  query=qp.parse(key);
+            bq.add(query, BooleanClause.Occur.MUST);
+            bq.add(query1, BooleanClause.Occur.MUST);
             TopDocs docs= indexSearcher.search(query,10);
             System.out.println("docs.size="+docs.scoreDocs.length);
             for(ScoreDoc doc:docs.scoreDocs){
+                Explanation  explanation=indexSearcher.explain(query,doc.doc);
+                System.out.println(explanation.toString());
                 int  index=doc.doc;
                 Document document=indexSearcher.doc(index);
-                String fileName=document.get("fileName");
-                System.out.println("fileName="+fileName);
-                String fileSize=document.get("fileSize");
-                System.out.println("fileSize="+fileSize);
-                String filePath=document.get("filePath");
-                System.out.println("filePath="+filePath);
-                String  content=document.get("fileContent");
+                String titles=document.get("title");
+                System.out.println("title="+titles);
+                String urls=document.get("url");
+                System.out.println("url="+urls);
+                String auths=document.get("auth");
+                System.out.println("auth="+auths);
+                String dates=document.get("date");
+                System.out.println("date="+dates);
+                String  digs=document.get("like");
+                System.out.println("dig="+digs);
+                String  comments=document.get("comment");
+                System.out.println("comment="+comments);
+                String  browse=document.get("browse");
+                System.out.println("browse="+browse);
+                String  content=document.get("content");
                 System.out.println("content="+content);
+                String  img=document.get("img");
+                System.out.println("img="+img);
             }
             dr.close();
-        } catch (IOException | ParseException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         System.out.println("查找完成");

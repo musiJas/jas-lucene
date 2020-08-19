@@ -1,12 +1,10 @@
-package cn.begonia.lucene.jaslucene.service;
+package cn.begonia.lucene.jaslucene.service.handler;
 
 import cn.begonia.lucene.jaslucene.common.ResourceFactory;
 import cn.begonia.lucene.jaslucene.resourece.ResourceAttribute;
-import cn.begonia.lucene.jaslucene.util.FileUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
-import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.Version;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +30,7 @@ public class LuceneWriterService {
 
     public  void   openResource(String  indexPath){
         try {
+            
             fsDirectory= FSDirectory.open(new File(indexPath));
             IKAnalyzer ikAnalyzer=new IKAnalyzer();
             IndexWriterConfig indexWriterConfig=new IndexWriterConfig(Version.LUCENE_CURRENT,ikAnalyzer);

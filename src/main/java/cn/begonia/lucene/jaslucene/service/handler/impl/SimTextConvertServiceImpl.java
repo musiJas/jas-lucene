@@ -1,8 +1,8 @@
-package cn.begonia.lucene.jaslucene.service.impl;
+package cn.begonia.lucene.jaslucene.service.handler.impl;
 
 import cn.begonia.lucene.jaslucene.resourece.ResourceAttribute;
 import cn.begonia.lucene.jaslucene.resourece.SimtextResource;
-import cn.begonia.lucene.jaslucene.service.DocumentConvert;
+import cn.begonia.lucene.jaslucene.service.handler.DocumentConvert;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.TextField;
@@ -10,7 +10,6 @@ import org.apache.lucene.index.IndexWriter;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.io.StringReader;
 import java.util.List;
 import java.util.Map;
 
