@@ -34,6 +34,7 @@ public class LuceneWriterService {
             fsDirectory= FSDirectory.open(new File(indexPath));
             IKAnalyzer ikAnalyzer=new IKAnalyzer();
             IndexWriterConfig indexWriterConfig=new IndexWriterConfig(Version.LUCENE_CURRENT,ikAnalyzer);
+            indexWriterConfig.setOpenMode(IndexWriterConfig.OpenMode.CREATE_OR_APPEND);
             indexWriter =new IndexWriter(fsDirectory,indexWriterConfig);
         } catch (IOException e) {
             e.printStackTrace();
@@ -41,6 +42,7 @@ public class LuceneWriterService {
     }
 
     public  void  createIndex(ResourceAttribute  attribute){
+
         long  startTime=System.currentTimeMillis();
         log.info("开始创建索引数据.");
         DocumentConvert documentConvert=resourceFactory.get(attribute);

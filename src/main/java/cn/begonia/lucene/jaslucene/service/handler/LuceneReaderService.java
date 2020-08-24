@@ -1,8 +1,10 @@
 package cn.begonia.lucene.jaslucene.service.handler;
 
 import cn.begonia.lucene.jaslucene.common.Result;
+import cn.begonia.lucene.jaslucene.config.ContextProperties;
 import cn.begonia.lucene.jaslucene.famatter.parser.RangeParser;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
@@ -19,6 +21,7 @@ import org.apache.lucene.search.highlight.QueryScorer;
 import org.apache.lucene.search.highlight.SimpleHTMLFormatter;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.Version;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.wltea.analyzer.lucene.IKAnalyzer;
 
@@ -39,6 +42,9 @@ public class LuceneReaderService {
     private FSDirectory  fsDirectory;
     private DirectoryReader directoryReader;
     private IndexSearcher indexSearcher;
+    @Autowired
+    ContextProperties properties;
+
 
     /** 新增查询数据 **/
     public Result  executeQuery(Query  query,int item){
@@ -272,6 +278,7 @@ public class LuceneReaderService {
         } catch (ParseException e) {
             e.printStackTrace();
         }
+        closeReader();
         return Result.isOk();
     }
 
@@ -315,8 +322,9 @@ public class LuceneReaderService {
 
     }
 
-
-
+   /* *//** 直接打开索引
+     * @request indexPath
+     * **//*
     public  void  openResource(String  indexPath){
         try {
             fsDirectory= FSDirectory.open(new File(indexPath));
@@ -325,7 +333,61 @@ public class LuceneReaderService {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }*/
+
+    /**
+     * 按照分类打开索引
+     * @param category
+     * **/
+    public  void  openResource(String  indexPath,String category){
+        File  businessFile=new File(indexPath+ File.separator+category);
+        try {
+            fsDirectory= FSDirectory.open(businessFile);
+            directoryReader=DirectoryReader.open(fsDirectory);
+            indexSearcher=new IndexSearcher(directoryReader);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
+    /** 按照分类打开索引**/
+    public  void  openResource(String category){
+        String  indexPath=properties.getIndexPath();
+        File  businessFile=new File(indexPath+ File.separator+category);
+        try {
+            fsDirectory= FSDirectory.open(businessFile);
+            directoryReader=DirectoryReader.open(fsDirectory);
+            indexSearcher=new IndexSearcher(directoryReader);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**  切换索引reader 使用reopen **/
+    public  void  changeResource(String category){
+            if(StringUtils.isEmpty(category)){
+                return;
+            }
+        //IndexReader newReader = DirectoryReader.openIfChanged((DirectoryReader)reader, writer, false);//reader.reopen();      // 读入新增加的增量索引内容，满足实时索引需求
+
+       /* try {
+            IndexReader newReader = DirectoryReader.openIfChanged((DirectoryReader)reader, writer, false);//reader.reopen();      // 读入新增加的增量索引内容，满足实时索引需求
+            if (newReader != null) {
+                reader.close();
+                reader = newReader;
+            }
+            searcher = new IndexSearcher(reader);
+        } catch (CorruptIndexException e) {
+        } catch (IOException e) {
+        }*/
+
+
+    }
+
+
+
+
+
+
 
     public  void  closeReader(){
         if(directoryReader!=null){

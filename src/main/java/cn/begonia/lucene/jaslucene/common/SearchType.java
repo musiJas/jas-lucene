@@ -14,7 +14,7 @@ public enum SearchType {
     life("life","生活类-包含常识等"),
     reading("reading","阅读指导"),
     movie("movie","高分movie指导"),
-    journey("movie","旅行指导");
+    journey("journey","旅行指导");
 
     private  String  category;
     private  String  description;
@@ -46,5 +46,13 @@ public enum SearchType {
             list.add(type.getCategory());
         }
         return list.contains(category);
+    }
+
+    public static List<String>  list(){
+        List<String> list=new ArrayList<>();
+        for(SearchType type:SearchType.values()){
+            list.add(type.getCategory());
+        }
+        return list;
     }
 }

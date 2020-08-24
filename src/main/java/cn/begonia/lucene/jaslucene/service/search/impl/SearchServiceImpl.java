@@ -29,11 +29,21 @@ public class SearchServiceImpl  implements ISearchService {
 
     @Override
     public Result defaultCategorySearch(String category) {
-        return  luceneReaderService.numericQuery("","");
+        //return  luceneReaderService.numericQuery("","");
+        return  null;
     }
 
+    /** 在所有的索引中查询**/
     @Override
     public Result defaultKeywordSearch(String keyword) {
+        /**打开所有的索引目录*/
+        for(String index:SearchType.list()){
+            luceneReaderService.openResource(index);
+
+
+
+        }
+
         return null;
     }
 
@@ -42,6 +52,8 @@ public class SearchServiceImpl  implements ISearchService {
         if(!SearchType.validationCategory(category)){
             return defaultKeywordSearch(keyword);
         }
-        return  luceneReaderService.multiFieldQueryParser(LuceneFormatter.listFields(),keyword);
+        luceneReaderService.openResource(category);
+        Result result=luceneReaderService.multiFieldQueryParser(LuceneFormatter.listFields(),keyword);
+        return  result;
     }
 }

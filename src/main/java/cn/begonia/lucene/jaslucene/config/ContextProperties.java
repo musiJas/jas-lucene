@@ -15,4 +15,5 @@ import org.springframework.context.annotation.Configuration;
 public class ContextProperties {
     private  String  indexPath;
 
+
 }
