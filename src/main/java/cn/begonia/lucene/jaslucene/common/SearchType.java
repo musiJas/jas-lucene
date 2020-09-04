@@ -9,7 +9,7 @@ import java.util.List;
  * @description  查找的分类
  **/
 public enum SearchType {
-    blog("blog","博客类型"),
+    blog("cnblogs","博客类型"),
     hotspot("hotspot","热点数据"),
     life("life","生活类-包含常识等"),
     reading("reading","阅读指导"),

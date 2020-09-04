@@ -25,7 +25,7 @@ public class LuceneSearchController {
     }
 
     @RequestMapping("/search")
-    public Result  search(@RequestParam String keyword,@RequestParam String category){
+    public Result  search(@RequestParam(value = "keyword",required = false) String keyword,@RequestParam(value = "category",required = false) String category){
         //luceneReaderService.termQuery("titles",key);
         /** 先判断关键词是否为空 如果为空则以默认条件进行检索即时间检索**/
         if(StringUtils.isEmpty(keyword)){
@@ -35,7 +35,7 @@ public class LuceneSearchController {
             return  searchService.defaultCategorySearch(category);
         }else {
             if(StringUtils.isEmpty(category)){
-                return  searchService.defaultKeywordSearch(category);
+                return  searchService.defaultKeywordSearch(keyword);
             }
             return searchService.search(keyword,category);
         }

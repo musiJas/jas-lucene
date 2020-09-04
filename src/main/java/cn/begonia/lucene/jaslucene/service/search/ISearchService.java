@@ -28,5 +28,5 @@ public interface ISearchService {
      * 默认的全文查找查询 意味着关键词和分类都有
      * 则在该分类下进行关键词检索
      * **/
-    Result  search(String category,String keyword);
+    Result  search(String keyword,String category);
 }

@@ -1,7 +1,10 @@
 package cn.begonia.lucene.jaslucene.util;
 
+import org.apache.commons.lang.StringUtils;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 
 /**
@@ -46,12 +49,35 @@ public class DateUtils {
     }
 
 
+    /** 获取当前给定时间的往前24小时的日期区间 **/
+    public static  String   getDurationTime(Date date){
+        if(date == null){
+            return "";
+        }
+        Calendar  cal=Calendar.getInstance();
+        cal.setTime(date);
+        cal.add(Calendar.DAY_OF_MONTH,-1);
+        Date  yestoday=cal.getTime();
+
+        StringBuffer  sb=new StringBuffer();
+        sb.append("date:[");
+        sb.append(format(yestoday,"yyyy-MM-dd "));
+        sb.append(" TO ").append(format(date,"yyyy-MM-dd"));
+        sb.append("]");
+        return sb.toString();
+    }
+
+    public  static String   getDefaultDate(){
+        return  getDurationTime(new Date());
+    }
+
+
     public static void main(String[] args) throws ParseException {
 
-
+        System.out.println(getDefaultDate());
 
        // System.out.println(new DateUtils().format(new Date()));
-        System.out.println(DateUtils.parse("2020-08-18"));
+        //System.out.println(DateUtils.parse("2020-08-18"));
 
 
     }

@@ -2,11 +2,13 @@ package cn.begonia.lucene.jaslucene.demo;
 
 import cn.begonia.lucene.jaslucene.famatter.parser.RangeParser;
 import cn.begonia.lucene.jaslucene.util.DateUtils;
-import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.analysis.ar.ArabicAnalyzer;
 import org.apache.lucene.analysis.core.SimpleAnalyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
-import org.apache.lucene.document.*;
+import org.apache.lucene.document.Document;
+import org.apache.lucene.document.Field;
+import org.apache.lucene.document.StoredField;
+import org.apache.lucene.document.TextField;
 import org.apache.lucene.index.*;
 import org.apache.lucene.queryparser.classic.MultiFieldQueryParser;
 import org.apache.lucene.queryparser.classic.ParseException;
@@ -17,16 +19,22 @@ import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.Version;
 import org.wltea.analyzer.lucene.IKAnalyzer;
 
+import javax.validation.constraints.Size;
 import java.io.*;
 
-public class demo2 {
+public class demo3 {
+    private static Directory directory=null;
+    private static  DirectoryReader dr=null;
+    private static  IndexSearcher indexSearcher=null;
+    private static  IndexWriter indexWriter=null;
+
 
     private  static  String  indexStaticPath="D:\\data\\index\\cnblogs";
 
 
     private  static  String  indexStaticRoot="D:\\data\\index\\";
 
-    public static void main(String[] args) throws FileNotFoundException, ParseException, java.text.ParseException {
+    public static void main(String[] args) throws IOException, ParseException, java.text.ParseException {
         String  resource="D:\\data\\text";
         String  index="D:\\data\\index";
         String  key="date";
@@ -34,6 +42,7 @@ public class demo2 {
         //String  value="like:[10 TO 100]";
 
         long  startTime= System.currentTimeMillis();
+        changeResource("cnblogs");
         String contentTitle="title";
         String  content="特朗普";
         //String  content="title:codermy";
@@ -41,7 +50,7 @@ public class demo2 {
         //multiFieldQueryParser(multi,content);
         //queryStringResult(contentTitle,content);
         //queryIndex(index,key);
-         queryNumericResult(key,value);
+         //queryNumericResult(key,value);
         /*try {
             createIndex(index,resource);
         } catch (IOException e) {
@@ -83,11 +92,12 @@ public class demo2 {
         return "";
     }
 
+    @SuppressWarnings("all")
     public static  void  executeQuery(Query query){
         try {
-            Directory directory= FSDirectory.open(new File(indexStaticPath));
+          /*  Directory directory= FSDirectory.open(new File(indexStaticPath));
             DirectoryReader dr=DirectoryReader.open(directory);
-            IndexSearcher indexSearcher=new IndexSearcher(dr);
+            IndexSearcher indexSearcher=new IndexSearcher(dr);*/
        /*     IKAnalyzer  ik=new IKAnalyzer();
             ArabicAnalyzer   arabicAnalyzer=new ArabicAnalyzer(Version.LUCENE_CURRENT);
             BooleanQuery  bq=new BooleanQuery();
@@ -233,19 +243,21 @@ public class demo2 {
     }
 
 
-  /*  *//**  切换索引reader 使用reopen **//*
     @SuppressWarnings("all")
-    public  void  changeResource(String category) throws IOException, ParseException {
-        Directory directory= FSDirectory.open(new File(indexStaticRoot+category));
-        DirectoryReader dr=DirectoryReader.open(directory);
-        IndexSearcher indexSearcher=new IndexSearcher(dr);
+    public  static  void  changeResource(String category) throws IOException, ParseException {
+          directory= FSDirectory.open(new File(indexStaticRoot+category));
+          dr=DirectoryReader.open(directory);
+          indexSearcher=new IndexSearcher(dr);
 
         queryStringResult("title","title:Urule开源版");
         try {
+            category="hotspot";
+            directory= FSDirectory.open(new File(indexStaticRoot+category));
             IKAnalyzer  ikAnalyzer=new IKAnalyzer();
             IndexWriterConfig indexWriterConfig=new IndexWriterConfig(Version.LUCENE_CURRENT,ikAnalyzer);
             indexWriterConfig.setOpenMode(IndexWriterConfig.OpenMode.CREATE_OR_APPEND);
-            IndexWriter indexWriter =new IndexWriter(directory,indexWriterConfig);
+            indexWriter =new IndexWriter(directory,indexWriterConfig);
+
             IndexReader newReader = DirectoryReader.openIfChanged(dr, indexWriter, false);//reader.reopen();      // 读入新增加的增量索引内容，满足实时索引需求
             if (newReader != null) {
                 dr.close();
@@ -253,13 +265,17 @@ public class demo2 {
             }
             indexSearcher = new IndexSearcher(dr);
             String  value="date:[2020-08-18 TO 2020-08-19]";
-             queryNumericResult("date",value);
+            queryNumericResult("date",value);
+
+
         } catch (CorruptIndexException e) {
         } catch (IOException e) {
-        }*/
+        } catch (java.text.ParseException e) {
+            e.printStackTrace();
+        }
 
 
-    //}
+    }
 
 
 }

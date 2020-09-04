@@ -5,8 +5,21 @@ import cn.begonia.lucene.jaslucene.common.SearchType;
 import cn.begonia.lucene.jaslucene.famatter.LuceneFormatter;
 import cn.begonia.lucene.jaslucene.service.handler.LuceneReaderService;
 import cn.begonia.lucene.jaslucene.service.search.ISearchService;
+import cn.begonia.lucene.jaslucene.util.DateUtils;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import org.apache.lucene.analysis.standard.StandardAnalyzer;
+import org.apache.lucene.queryparser.classic.ParseException;
+import org.apache.lucene.queryparser.classic.QueryParser;
+import org.apache.lucene.search.Query;
+import org.apache.lucene.util.Version;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
 
 /**
  * @author begonia_chen
@@ -23,32 +36,57 @@ public class SearchServiceImpl  implements ISearchService {
 
     @Override
     public Result defaultAllCategorySearch() {
-
-        return null;
+        List<JSONObject> result=new ArrayList<>();
+        /**打开所有的索引目录*/
+        try {
+            for(String category:SearchType.list()){
+                /* luceneReaderService.openResource(index);*/
+                luceneReaderService.changeResource(category);
+                String [] str=LuceneFormatter.listFields();
+                // Result  res=luceneReaderService.multiFieldQueryParser(str,keyword);
+                Result  res =luceneReaderService.numericQuery("date",DateUtils.getDefaultDate());
+                result.addAll((Collection<? extends JSONObject>) res.getObj());
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }finally {
+            //luceneReaderService.closeReader();
+        }
+        return Result.isOk(result);
     }
 
+    /** 在分类中推荐24小时内容 **/
     @Override
     public Result defaultCategorySearch(String category) {
-        //return  luceneReaderService.numericQuery("","");
+        luceneReaderService.openResource(category);
+        Result  result=null;
+        try {
+            result =luceneReaderService.numericQuery("date",DateUtils.getDefaultDate());
+           // luceneReaderService.closeReader();
+           return  result;
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
         return  null;
     }
 
     /** 在所有的索引中查询**/
     @Override
     public Result defaultKeywordSearch(String keyword) {
+        List<JSONObject> result=new ArrayList<>();
         /**打开所有的索引目录*/
-        for(String index:SearchType.list()){
-            luceneReaderService.openResource(index);
-
-
-
+        for(String category:SearchType.list()){
+            luceneReaderService.changeResource(category);
+            String [] str=LuceneFormatter.listFields();
+            Result  res=luceneReaderService.multiFieldQueryParser(str,keyword);
+            result.addAll((Collection<? extends JSONObject>) res.getObj());
         }
-
-        return null;
+        //luceneReaderService.closeReader();
+        return Result.isOk(result);
     }
 
     @Override
-    public Result search(String category, String keyword) {
+    public Result search(String keyword, String category) {
         if(!SearchType.validationCategory(category)){
             return defaultKeywordSearch(keyword);
         }

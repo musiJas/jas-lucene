@@ -7,6 +7,7 @@ import cn.begonia.lucene.jaslucene.resourece.RedisSource;
 import cn.begonia.lucene.jaslucene.service.handler.LuceneWriterService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
@@ -26,7 +27,7 @@ public class RedisCreateIndexJob {
     LuceneWriterService  luceneWriterService;
 
 
-//    @Scheduled(cron="0 0/1 * * * ?")
+    //@Scheduled(cron="0 * */1 * * ?")
     public  void  startCreateIndex(){
         log.info("开始创建索引数据.");
         RedisSource  redisSource=new RedisSource();
