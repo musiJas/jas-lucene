@@ -11,6 +11,7 @@ public class Result {
     private  int  code;
     private  String  msg;
     private  Object  obj;
+    private  int  total;
 
     public  Result(){
 

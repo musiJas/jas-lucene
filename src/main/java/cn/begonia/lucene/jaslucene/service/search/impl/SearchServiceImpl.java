@@ -1,24 +1,19 @@
 package cn.begonia.lucene.jaslucene.service.search.impl;
 
+import cn.begonia.lucene.jaslucene.common.QueryCondition;
 import cn.begonia.lucene.jaslucene.common.Result;
 import cn.begonia.lucene.jaslucene.common.SearchType;
 import cn.begonia.lucene.jaslucene.famatter.LuceneFormatter;
 import cn.begonia.lucene.jaslucene.service.handler.LuceneReaderService;
 import cn.begonia.lucene.jaslucene.service.search.ISearchService;
 import cn.begonia.lucene.jaslucene.util.DateUtils;
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.queryparser.classic.ParseException;
-import org.apache.lucene.queryparser.classic.QueryParser;
-import org.apache.lucene.search.Query;
-import org.apache.lucene.util.Version;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -35,18 +30,17 @@ public class SearchServiceImpl  implements ISearchService {
     }
 
     @Override
-    public Result defaultAllCategorySearch() {
+    public Result defaultAllCategorySearch(QueryCondition queryParser) {
         List<JSONObject> result=new ArrayList<>();
         /**打开所有的索引目录*/
         try {
-            for(String category:SearchType.list()){
-                /* luceneReaderService.openResource(index);*/
-                luceneReaderService.changeResource(category);
-                String [] str=LuceneFormatter.listFields();
-                // Result  res=luceneReaderService.multiFieldQueryParser(str,keyword);
-                Result  res =luceneReaderService.numericQuery("date",DateUtils.getDefaultDate());
-                result.addAll((Collection<? extends JSONObject>) res.getObj());
-            }
+            return luceneReaderService.multiIndexQuery(queryParser);
+            /* luceneReaderService.openResource(index);*/
+           /* luceneReaderService.changeResource(category);
+            String [] str=LuceneFormatter.listFields();
+            // Result  res=luceneReaderService.multiFieldQueryParser(str,keyword);
+            Result  res =luceneReaderService.numericQuery("date",DateUtils.getDefaultDate());
+            result.addAll((Collection<? extends JSONObject>) res.getObj());*/
         }catch (Exception e){
             e.printStackTrace();
         }finally {

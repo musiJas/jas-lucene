@@ -1,8 +1,12 @@
 package cn.begonia.lucene.jaslucene.service.handler;
 
+import cn.begonia.lucene.jaslucene.common.QueryCondition;
 import cn.begonia.lucene.jaslucene.common.Result;
+import cn.begonia.lucene.jaslucene.common.SearchType;
 import cn.begonia.lucene.jaslucene.config.ContextProperties;
+import cn.begonia.lucene.jaslucene.famatter.LuceneFormatter;
 import cn.begonia.lucene.jaslucene.famatter.parser.RangeParser;
+import cn.begonia.lucene.jaslucene.util.DateUtils;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
@@ -262,7 +266,7 @@ public class LuceneReaderService {
       * **/
     public  Result    analyzerParseQuery(String field,String  content){
         IKAnalyzer  ikAnalyzer=new IKAnalyzer();
-        QueryParser  queryParser=new QueryParser(Version.LUCENE_CURRENT,field,ikAnalyzer);
+        QueryParser queryParser=new QueryParser(Version.LUCENE_CURRENT,field,ikAnalyzer);
         try {
             Query  query=queryParser.parse(content);
             return executeQuery(query);
@@ -384,6 +388,59 @@ public class LuceneReaderService {
             e.printStackTrace();
         }
     }
+
+    /** 多索引窗口查询 **/
+    public Result    multiIndexQuery(QueryCondition queryParser) throws ParseException, IOException {
+       String  root=properties.getIndexPath();
+       List<DirectoryReader> list=new ArrayList<>();
+        for(String category: SearchType.list()){
+            try {
+                list.add(DirectoryReader.open(FSDirectory.open(new File(root+File.separator+category))));
+            } catch (IOException e) {
+                continue;
+            }
+        }
+        MultiReader  multiReader=new MultiReader(list.toArray(new DirectoryReader[list.size()]));
+        IndexSearcher indexSearcher=new IndexSearcher(multiReader);
+        String value= DateUtils.getDefaultDate();
+        RangeParser parser=new RangeParser(Version.LUCENE_35,"data",new StandardAnalyzer(Version.LUCENE_35));
+        Query  query=parser.parse(value);
+
+        SortField  date =new SortField("date",SortField.Type.LONG,true);
+        SortField  like=new SortField("like",SortField.FIELD_SCORE.getType());
+        Sort  sort=new Sort(date,like);
+
+        TopFieldCollector collector =  TopFieldCollector.create(sort, 10000, true, true, false, false);
+        //TopScoreDocCollector collector = TopScoreDocCollector.create(10000, false);
+        TopDocs docs=null;
+        if(queryParser.getPage()==0){
+             docs= indexSearcher.search(query,10000,sort);
+        }else {
+            indexSearcher.search(query,collector);
+            docs =collector.topDocs(queryParser.getPage(),queryParser.getPageSize());
+        }
+        System.out.println("size大小"+queryParser.getPage()+";pagesize"+queryParser.getPageSize());
+        List<JSONObject> resList=new ArrayList<>();
+        JSONObject obj=null;
+         //topDocs(1);
+
+        for(ScoreDoc doc:docs.scoreDocs){
+            obj=new JSONObject();
+            int  index=doc.doc;
+            Document document=indexSearcher.doc(index);
+            for(String key:LuceneFormatter.listFields()){
+                obj.put(key,document.get(key));
+            }
+            resList.add(obj);
+        }
+        if(multiReader!=null){
+            multiReader.close();
+        }
+
+        return Result.isOk(resList);
+    }
+
+
 
     /**  切换索引reader 使用reopen **/
     public  void  changeResource(String category){

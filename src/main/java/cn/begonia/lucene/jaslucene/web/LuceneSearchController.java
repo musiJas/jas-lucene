@@ -1,5 +1,6 @@
 package cn.begonia.lucene.jaslucene.web;
 
+import cn.begonia.lucene.jaslucene.common.QueryCondition;
 import cn.begonia.lucene.jaslucene.common.Result;
 import cn.begonia.lucene.jaslucene.service.handler.LuceneReaderService;
 import cn.begonia.lucene.jaslucene.service.search.ISearchService;
@@ -25,12 +26,17 @@ public class LuceneSearchController {
     }
 
     @RequestMapping("/search")
-    public Result  search(@RequestParam(value = "keyword",required = false) String keyword,@RequestParam(value = "category",required = false) String category){
+    public Result  search(
+                @RequestParam(value = "keyword",required = false) String keyword,
+                @RequestParam(value = "category",required = false) String category,
+                @RequestParam(value = "page",required = false, defaultValue = "0") int  page,
+                @RequestParam(value = "pageSize",required = false,defaultValue = "0") int pageSize
+                ){
         //luceneReaderService.termQuery("titles",key);
         /** 先判断关键词是否为空 如果为空则以默认条件进行检索即时间检索**/
         if(StringUtils.isEmpty(keyword)){
             if(StringUtils.isEmpty(category)){
-                return  searchService.defaultAllCategorySearch();
+                return  searchService.defaultAllCategorySearch(new QueryCondition(page,pageSize));
             }
             return  searchService.defaultCategorySearch(category);
         }else {

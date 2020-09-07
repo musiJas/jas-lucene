@@ -56,7 +56,7 @@ public class DateUtils {
         }
         Calendar  cal=Calendar.getInstance();
         cal.setTime(date);
-        cal.add(Calendar.DAY_OF_MONTH,-1);
+        cal.add(Calendar.DAY_OF_MONTH,-30);
         Date  yestoday=cal.getTime();
 
         StringBuffer  sb=new StringBuffer();

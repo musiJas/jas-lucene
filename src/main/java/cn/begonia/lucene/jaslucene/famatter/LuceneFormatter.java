@@ -20,7 +20,7 @@ public enum LuceneFormatter {
     url("url", StringField.class,Field.Store.YES,Field.Index.NOT_ANALYZED,1.0f),
     auth("auth",TextField.class,Field.Store.YES, Field.Index.ANALYZED_NO_NORMS,2.0f),
     date("date", LongField.class,Field.Store.YES,Field.Index.ANALYZED,1.0f),
-    like("like", IntField.class,Field.Store.YES,Field.Index.NOT_ANALYZED,1.0f),
+    like("like", IntField.class,Field.Store.YES,Field.Index.NOT_ANALYZED,3.0f),
     comment("comment", IntField.class,Field.Store.YES,Field.Index.NOT_ANALYZED,1.0f),
     browse("browse",IntField.class,Field.Store.YES,Field.Index.NOT_ANALYZED,1.0f),
     content("content",TextField.class, Field.Store.YES,Field.Index.ANALYZED,3.0f),

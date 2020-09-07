@@ -21,7 +21,7 @@ import java.io.*;
 
 public class demo2 {
 
-    private  static  String  indexStaticPath="D:\\data\\index\\cnblogs";
+    private  static  String  indexStaticPath="D:\\data\\index\\hotspot";
 
 
     private  static  String  indexStaticRoot="D:\\data\\index\\";
@@ -30,7 +30,7 @@ public class demo2 {
         String  resource="D:\\data\\text";
         String  index="D:\\data\\index";
         String  key="date";
-        String  value="date:[2020-08-18 TO 2020-08-19]";
+        String  value="date:[2020-08-18 TO 2020-09-19]";
         //String  value="like:[10 TO 100]";
 
         long  startTime= System.currentTimeMillis();

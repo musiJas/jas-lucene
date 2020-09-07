@@ -1,5 +1,6 @@
 package cn.begonia.lucene.jaslucene.service.search;
 
+import cn.begonia.lucene.jaslucene.common.QueryCondition;
 import cn.begonia.lucene.jaslucene.common.Result;
 
 /**
@@ -13,7 +14,7 @@ public interface ISearchService {
     /**
      * 默认的全目录查询 意味着关键词和分类为空
      * **/
-    Result  defaultAllCategorySearch();
+    Result  defaultAllCategorySearch(QueryCondition queryParser);
     /**
      * 默认的目录查询 意味着关键词为空
      * 在当前的分类中按照时间的前后推荐24小时内容
