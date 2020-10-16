@@ -27,7 +27,7 @@ public class RedisCreateIndexJob {
     LuceneWriterService  luceneWriterService;
 
 
-    //@Scheduled(cron="0 * */1 * * ?")
+    @Scheduled(cron="0 * */1 * * ?")
     public  void  startCreateIndex(){
         log.info("开始创建索引数据.");
         RedisSource  redisSource=new RedisSource();

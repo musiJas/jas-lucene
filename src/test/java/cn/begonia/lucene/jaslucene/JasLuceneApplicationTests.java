@@ -1,3 +1,4 @@
+/*
 package cn.begonia.lucene.jaslucene;
 
 import cn.begonia.lucene.jaslucene.util.CacheUtils;
@@ -33,3 +34,4 @@ public  class JasLuceneApplicationTests {
     }
 
 }
+*/
