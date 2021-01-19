@@ -73,8 +73,8 @@ public enum LuceneFormatter {
                         }else {
                             constructor=bf.fieldType.getConstructor(String.class,String.class, Store.class);
                             fs= constructor.newInstance(field,value,bf.storeValue);
+                            fs.setBoost(bf.boost);// 更新权重,默认是1.0f
                         }
-                        fs.setBoost(bf.boost);// 更新权重,默认是1.0f
                         return  fs;
 
                     } catch (NoSuchMethodException e) {

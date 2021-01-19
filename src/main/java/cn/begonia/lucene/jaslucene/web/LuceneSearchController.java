@@ -17,7 +17,7 @@ import org.springframework.web.servlet.ModelAndView;
  * @data 2020/8/17 18:01
  * @description
  **/
-
+@SuppressWarnings("all")
 @Controller
 public class LuceneSearchController {
     private ISearchService  searchService;
@@ -39,13 +39,21 @@ public class LuceneSearchController {
         if(StringUtils.isEmpty(keyword)){
             if(StringUtils.isEmpty(category)){
                 res =searchService.defaultAllCategorySearch(new QueryCondition(page,pageSize));
+            }else {
+                QueryCondition   queryCondition=new QueryCondition(page,pageSize);
+                queryCondition.setCategory(category);
+                res =searchService.defaultCategorySearch(queryCondition);
             }
-            res =searchService.defaultCategorySearch(category);
         }else {
             if(StringUtils.isEmpty(category)){
-                 res=  searchService.defaultKeywordSearch(keyword);
+                 QueryCondition   queryCondition=new QueryCondition(page,pageSize);
+                 queryCondition.setCategory(keyword);
+                 res=  searchService.defaultKeywordSearch(queryCondition);
             }else{
-                res= searchService.search(keyword,category);
+                QueryCondition   queryCondition=new QueryCondition(page,pageSize);
+                queryCondition.setKeyword(keyword);
+                queryCondition.setCategory(category);
+                res= searchService.search(queryCondition);
             }
         }
         modelAndView.setViewName("result");
@@ -64,7 +72,7 @@ public class LuceneSearchController {
             @RequestParam(value = "keyword",required = false) String keyword,
             @RequestParam(value = "category",required = false) String category,
             @RequestParam(value = "page",required = false, defaultValue = "0") int  page,
-            @RequestParam(value = "pageSize",required = false,defaultValue = "0") int pageSize
+            @RequestParam(value = "pageSize",required = false,defaultValue = "20") int pageSize
     ){
         Result  res=null;
         ModelAndView  modelAndView=new ModelAndView();
@@ -72,16 +80,38 @@ public class LuceneSearchController {
         if(StringUtils.isEmpty(keyword)){
             if(StringUtils.isEmpty(category)){
                 res =searchService.defaultAllCategorySearch(new QueryCondition(page,pageSize));
+            }else {
+                QueryCondition   queryCondition=new QueryCondition(page,pageSize);
+                queryCondition.setCategory(category);
+                res =searchService.defaultCategorySearch(queryCondition);
             }
-            res =searchService.defaultCategorySearch(category);
         }else {
             if(StringUtils.isEmpty(category)){
-                res=  searchService.defaultKeywordSearch(keyword);
+                QueryCondition   queryCondition=new QueryCondition(page,pageSize);
+                queryCondition.setKeyword(keyword);
+                res=  searchService.defaultKeywordSearch(queryCondition);
             }else{
-                res= searchService.search(keyword,category);
+                QueryCondition   queryCondition=new QueryCondition(page,pageSize);
+                queryCondition.setKeyword(keyword);
+                queryCondition.setCategory(category);
+                res= searchService.search(queryCondition);
             }
         }
         return res;
     }
 
+
+    @RequestMapping("/api/searchByDay")
+    @ResponseBody
+    public Result searchByToDay(
+            @RequestParam(value = "keyword",required = false) String keyword,
+            @RequestParam(value = "category",required = false) String category,
+            @RequestParam(value = "page",required = false, defaultValue = "0") int  page,
+            @RequestParam(value = "pageSize",required = false,defaultValue = "20") int pageSize
+    ) {
+        QueryCondition   queryCondition=new QueryCondition(page,pageSize);
+        queryCondition.setCategory(category);
+        Result res =searchService.defaultCategorySearch(queryCondition);
+        return res;
+    }
 }

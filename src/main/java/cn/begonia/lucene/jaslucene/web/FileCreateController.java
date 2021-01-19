@@ -1,6 +1,7 @@
 package cn.begonia.lucene.jaslucene.web;
 
 import cn.begonia.lucene.jaslucene.common.CacheType;
+import cn.begonia.lucene.jaslucene.common.QueryCondition;
 import cn.begonia.lucene.jaslucene.common.ResourceType;
 import cn.begonia.lucene.jaslucene.config.ContextProperties;
 import cn.begonia.lucene.jaslucene.resourece.FileResource;
@@ -50,7 +51,8 @@ public class FileCreateController {
         resource.setIndexPath(properties.getIndexPath());*/
         String  cacheType= CacheType.cnblogs.getKey();
         luceneReaderService.openResource(properties.getIndexPath()+ File.separator+cacheType);
-        luceneReaderService.termQuery(field,content);
+        QueryCondition   queryCondition=new QueryCondition();
+        luceneReaderService.termQuery(field,content,queryCondition);
         luceneReaderService.closeReader();
         long  endTime=System.currentTimeMillis();
         log.info("总共耗时:"+(endTime-startTime));

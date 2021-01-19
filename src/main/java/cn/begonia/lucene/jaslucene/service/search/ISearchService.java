@@ -19,15 +19,16 @@ public interface ISearchService {
      * 默认的目录查询 意味着关键词为空
      * 在当前的分类中按照时间的前后推荐24小时内容
      * **/
-    Result  defaultCategorySearch(String  category);
+    Result  defaultCategorySearch(QueryCondition queryParser);
     /**
      * 默认的关键词查询 意味着分类为空
      * 则在所有的索引目录下进行关键词查询,精确查询
      * **/
-    Result  defaultKeywordSearch(String keyword);
+    Result  defaultKeywordSearch(QueryCondition queryParser);
     /**
      * 默认的全文查找查询 意味着关键词和分类都有
      * 则在该分类下进行关键词检索
      * **/
-    Result  search(String keyword,String category);
+    Result  search(QueryCondition queryParser);
+
 }

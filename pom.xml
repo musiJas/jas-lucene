@@ -238,7 +238,7 @@
     </repositories>
     <build>
         <!-- 打包后的启动jar名称 -->
-        <finalName>spring-boot-assembly</finalName>
+        <finalName>jas-lucene</finalName>
         <resources>
             <resource>
                 <directory>src/main/resources</directory>
@@ -296,7 +296,7 @@
                     <archive>
                         <manifest>
                             <!-- 项目启动类 -->
-                            <mainClass>com.begonia.maven.Application</mainClass>
+                            <mainClass>cn.begonia.lucene.jaslucene.JasLuceneApplication</mainClass>
                             <!-- 依赖的jar的目录前缀 -->
                             <classpathPrefix>../lib</classpathPrefix>
                             <addClasspath>true</addClasspath>

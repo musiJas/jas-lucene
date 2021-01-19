@@ -22,8 +22,8 @@ import java.io.IOException;
 @Slf4j
 @Service
 public class LuceneWriterService {
-    private FSDirectory  fsDirectory;
-    private IndexWriter  indexWriter;
+    private   FSDirectory  fsDirectory;
+    private   IndexWriter  indexWriter;
 
     @Autowired
     private ResourceFactory  resourceFactory;

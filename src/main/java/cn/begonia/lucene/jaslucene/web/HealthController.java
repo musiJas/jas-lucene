@@ -1,5 +1,7 @@
 package cn.begonia.lucene.jaslucene.web;
 
+import cn.begonia.lucene.jaslucene.common.Result;
+import cn.begonia.lucene.jaslucene.common.SearchType;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -29,5 +31,10 @@ public class HealthController {
     @RequestMapping("/isOK")
     public  String  isOk(){
         return "isOk";
+    }
+
+    @RequestMapping("/category")
+    public Result   category(){
+        return Result.isOk(SearchType.listObject());
     }
 }

@@ -1,5 +1,7 @@
 package cn.begonia.lucene.jaslucene.common;
 
+import com.alibaba.fastjson.JSONObject;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -54,5 +56,14 @@ public enum SearchType {
             list.add(type.getCategory());
         }
         return list;
+    }
+
+
+    public static JSONObject  listObject(){
+        JSONObject  obj=new JSONObject();
+        for(SearchType type:SearchType.values()){
+            obj.put(type.getCategory(),type.getDescription());
+        }
+        return obj;
     }
 }

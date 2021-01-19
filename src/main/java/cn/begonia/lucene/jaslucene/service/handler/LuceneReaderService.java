@@ -34,6 +34,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -54,11 +55,12 @@ public class LuceneReaderService {
 
     /** 新增查询数据 **/
     public Result  executeQuery(Query  query,int item){
-        return querySearch(query,item);
+        QueryCondition  queryCondition=new QueryCondition();
+        return querySearch(query,queryCondition);
     }
 
-    public  Result   executeQuery(Query query){
-        return querySearch(query,100);
+    public  Result   executeQuery(Query query,QueryCondition  queryCondition){
+        return querySearch(query,queryCondition);
     }
 
     /**
@@ -66,10 +68,12 @@ public class LuceneReaderService {
      * @field
      * @param  expression 表达式
      * */
-    public    Result  numericQuery(String field,String expression) throws ParseException {
+    public    Result  numericQuery(String field,String expression,QueryCondition queryCondition) throws ParseException {
         RangeParser parser=new RangeParser(Version.LUCENE_CURRENT,field,new StandardAnalyzer(Version.LUCENE_CURRENT));
         Query  query=parser.parse(expression);
-        return executeQuery(query);
+
+
+        return executeQuery(query,queryCondition);
     }
 
     /**
@@ -77,14 +81,29 @@ public class LuceneReaderService {
      * @param query
      * @throws IOException
      */
-    public  Result  querySearch(Query query,int total){
+    @SuppressWarnings("all")
+    public  Result  querySearch(Query query,QueryCondition condition){
         List<JSONObject> list=new ArrayList<>();
-
         try {
-            TopDocs topDocs = indexSearcher.search(query, total);
+            SortField  rank=new SortField("rank",SortField.Type.INT,false);
+            SortField  like=new SortField("like",SortField.Type.INT,true);
+            SortField  date =new SortField("date",SortField.Type.LONG,true);
+            SortField  focus =new SortField("focus",SortField.Type.INT,true);
+            SortField  browse =new SortField("browse",SortField.Type.INT,true);
+            SortField  comment =new SortField("comment",SortField.Type.INT,true);
+            Sort  sort=new Sort(rank,like,date,focus,browse,comment);
+            TopFieldCollector collector =  TopFieldCollector.create(sort, 10000, true, true, false, false);
+            //TopScoreDocCollector collector = TopScoreDocCollector.create(10000, false);
+            TopDocs docs=null;
+            if(condition.getPage()==null||condition.getPage()==0){
+                docs= indexSearcher.search(query,10000,sort);
+            }else {
+                indexSearcher.search(query,collector);
+                docs =collector.topDocs(condition.getPage(),condition.getPageSize());
+            }
             //打印查询到的记录数
-            System.out.println("总共查询到" + topDocs.totalHits + "个文档");
-            for (ScoreDoc scoreDoc : topDocs.scoreDocs) {
+            System.out.println("总共查询到" + docs.totalHits + "个文档");
+            for (ScoreDoc scoreDoc : docs.scoreDocs) {
                 JSONObject obj=new JSONObject();
                 //取得对应的文档对象
                 Document document = indexSearcher.doc(scoreDoc.doc);
@@ -144,16 +163,16 @@ public class LuceneReaderService {
      * @param key  field
      * @param value  condition
      * **/
-    public  Result  termQuery(String key,String value){
+    public  Result  termQuery(String key,String value,QueryCondition queryCondition){
         TermQuery  query=new TermQuery(new Term(key,value));
-        return executeQuery(query);
+        return executeQuery(query,queryCondition);
     }
 
     /**
      * method
      * **/
-    public   Result  termQuery(Term  term){
-       return executeQuery(new TermQuery(term));
+    public   Result  termQuery(Term  term,QueryCondition queryCondition){
+        return executeQuery(new TermQuery(term),queryCondition);
     }
 
     /***
@@ -164,16 +183,16 @@ public class LuceneReaderService {
      * BooleanQuery本身来讲是一个布尔子句的容器，它提供了专门的API方法往其中添加子句，
      * 并标明它们之间的关系，以下代码为BooleanQuery提供的用于添加子句的API接口：
      */
-    public  Result   multipleQuery(Map<String,Object> map){
+    public  Result   multipleQuery(Map<String,Object> map,QueryCondition  queryCondition){
         List<Term> list=new ArrayList<>();
         for(Map.Entry<String,Object> ty:map.entrySet()){
             Term term=new Term(ty.getKey(),String.valueOf(ty.getValue()));
             list.add(term);
         }
-        return  multipleQuery(list);
+        return  multipleQuery(list,queryCondition);
     }
 
-    public  Result   multipleQuery(List<Term> list){
+    public  Result   multipleQuery(List<Term> list,QueryCondition queryCondition){
         // BooleanClause用于表示布尔查询子句关系的类，
         // 包 括：
         // BooleanClause.Occur.MUST，
@@ -191,7 +210,7 @@ public class LuceneReaderService {
         for(Term term:list){
             booleanQuery.add(new TermQuery(term), BooleanClause.Occur.SHOULD);
         }
-        return executeQuery(booleanQuery);
+        return executeQuery(booleanQuery,queryCondition);
     }
 
     /**
@@ -200,9 +219,9 @@ public class LuceneReaderService {
      * PrefixQuery用于匹配其索引开始以指定的字符串的文档。就是文档中存在xxx%
      * <p>
      * **/
-    public  Result  prefixQuery(String key ,Object value){
+    public  Result  prefixQuery(String key ,Object value,QueryCondition queryCondition){
         Query query=new PrefixQuery(new Term(key,String.valueOf(value)));
-        return executeQuery(query);
+        return executeQuery(query,queryCondition);
     }
 
 
@@ -215,13 +234,13 @@ public class LuceneReaderService {
      * 那么就无法匹配成功了，如果也想让这个匹配，就需要设定slop，
      * 先给出slop的概念：slop是指两个项的位置之间允许的最大间隔距离
      * **/
-    public  Result phraseQuery(String key,List<Object> list,int  slop){
+    public  Result phraseQuery(String key,List<Object> list,int  slop,QueryCondition  queryCondition){
         PhraseQuery  phraseQuery=new PhraseQuery();
         for(Object obj:list){
             phraseQuery.add(new Term(key,String.valueOf(obj)));
         }
         phraseQuery.setSlop(slop);
-        return  executeQuery(phraseQuery);
+        return  executeQuery(phraseQuery,queryCondition);
     }
 
     /**
@@ -230,9 +249,9 @@ public class LuceneReaderService {
      * FuzzyQuery是一种模糊查询，它可以简单地识别两个相近的词语。
      *
      * **/
-    public  Result  fuzzyQuery(String key,String value){
+    public  Result  fuzzyQuery(String key,String value,QueryCondition queryCondition){
         FuzzyQuery  fuzzyQuery=new FuzzyQuery(new Term(key,value));
-        return executeQuery(fuzzyQuery);
+        return executeQuery(fuzzyQuery,queryCondition);
     }
 
     /**
@@ -242,9 +261,9 @@ public class LuceneReaderService {
      * 通配符“?”代表1个字符，而“*”则代表0至多个字符。
      *
      * */
-     public  Result  wildcardQuery(String  key,String  wildcard){
+     public  Result  wildcardQuery(String  key,String  wildcard,QueryCondition queryCondition){
          WildcardQuery  wildcardQuery=new WildcardQuery(new Term(key,wildcard));
-         return  executeQuery(wildcardQuery);
+         return  executeQuery(wildcardQuery,queryCondition);
      }
 
      /**
@@ -255,21 +274,21 @@ public class LuceneReaderService {
       * iSBlow 是否含低
       * isCell 是否含顶
       * **/
-     public  Result  numericRangeQuery(String  field,int start,int end ,boolean  isBlow,boolean  isCell){
+     public  Result  numericRangeQuery(String  field,int start,int end ,boolean  isBlow,boolean  isCell ,QueryCondition queryCondition){
          Query  query= NumericRangeQuery.newIntRange(field,start,end,isBlow,isCell);
-         return executeQuery(query);
+         return executeQuery(query,queryCondition);
      }
 
 
      /**
       * 分词查询
       * **/
-    public  Result    analyzerParseQuery(String field,String  content){
+    public  Result    analyzerParseQuery(String field,String  content ,QueryCondition queryCondition){
         IKAnalyzer  ikAnalyzer=new IKAnalyzer();
         QueryParser queryParser=new QueryParser(Version.LUCENE_CURRENT,field,ikAnalyzer);
         try {
             Query  query=queryParser.parse(content);
-            return executeQuery(query);
+            return executeQuery(query,queryCondition);
         } catch (ParseException e) {
             e.printStackTrace();
         }
@@ -279,12 +298,12 @@ public class LuceneReaderService {
     /**
      * 多分词查询
      * **/
-    public Result  multiFieldQueryParser(String[] fields, String content){
+    public Result  multiFieldQueryParser(String[] fields, String content,QueryCondition queryCondition){
         IKAnalyzer  ikAnalyzer=new IKAnalyzer();
         MultiFieldQueryParser  multiFieldQueryParser=new MultiFieldQueryParser(Version.LUCENE_CURRENT,fields,ikAnalyzer);
         try {
             Query query=multiFieldQueryParser.parse(content);
-            return executeQuery(query);
+            return executeQuery(query,queryCondition);
         } catch (ParseException e) {
             e.printStackTrace();
         }
@@ -377,7 +396,7 @@ public class LuceneReaderService {
 
 
     /** 按照分类打开索引**/
-    public  void  openResource(String category){
+    public  void   openResource(String category) {
         String  indexPath=properties.getIndexPath();
         File  businessFile=new File(indexPath+ File.separator+category);
         try {
@@ -385,11 +404,28 @@ public class LuceneReaderService {
             directoryReader=DirectoryReader.open(fsDirectory);
             indexSearcher=new IndexSearcher(directoryReader);
         } catch (IOException e) {
-            e.printStackTrace();
+            // e.printStackTrace();
         }
     }
 
+    /** 按照分类打开索引**/
+    public  Result   openResourceByDay(String category) {
+        String  indexPath=properties.getIndexPath();
+        File  businessFile=new File(indexPath+ File.separator+category);
+        try {
+            fsDirectory= FSDirectory.open(businessFile);
+            directoryReader=DirectoryReader.open(fsDirectory);
+            indexSearcher=new IndexSearcher(directoryReader);
+        } catch (IOException e) {
+            // e.printStackTrace();
+            return  Result.isFail();
+            //throw  new RuntimeException("12312312");
+        }
+        return  Result.isOk();
+    }
+
     /** 多索引窗口查询 **/
+    @SuppressWarnings("all")
     public Result    multiIndexQuery(QueryCondition queryParser) throws ParseException, IOException {
        String  root=properties.getIndexPath();
        List<DirectoryReader> list=new ArrayList<>();
@@ -406,14 +442,18 @@ public class LuceneReaderService {
         RangeParser parser=new RangeParser(Version.LUCENE_35,"data",new StandardAnalyzer(Version.LUCENE_35));
         Query  query=parser.parse(value);
 
+        SortField  rank=new SortField("rank",SortField.Type.INT,false);
+        SortField  like=new SortField("like",SortField.Type.INT,true);
         SortField  date =new SortField("date",SortField.Type.LONG,true);
-        SortField  like=new SortField("like",SortField.FIELD_SCORE.getType());
-        Sort  sort=new Sort(date,like);
+        SortField  focus =new SortField("focus",SortField.Type.INT,true);
+        SortField  browse =new SortField("browse",SortField.Type.INT,true);
+        SortField  comment =new SortField("comment",SortField.Type.INT,true);
+        Sort  sort=new Sort(rank,like,date,focus,browse,comment);
 
         TopFieldCollector collector =  TopFieldCollector.create(sort, 10000, true, true, false, false);
         //TopScoreDocCollector collector = TopScoreDocCollector.create(10000, false);
         TopDocs docs=null;
-        if(queryParser.getPage()==0){
+        if(queryParser.getPage()==null||queryParser.getPage()==0){
              docs= indexSearcher.search(query,10000,sort);
         }else {
             indexSearcher.search(query,collector);
@@ -429,6 +469,72 @@ public class LuceneReaderService {
             int  index=doc.doc;
             Document document=indexSearcher.doc(index);
             for(String key:LuceneFormatter.listFields()){
+                /**转换一下date*/
+                if(StringUtils.equals(key,"date")){
+                    long   longDate=Long.parseLong(document.get(key));
+                    obj.put(key,DateUtils.format(new Date(longDate)));
+                }else {
+                    obj.put(key,document.get(key));
+                }
+            }
+            resList.add(obj);
+        }
+        if(multiReader!=null){
+            multiReader.close();
+        }
+        System.out.println("docs.totalHits:"+docs.totalHits);
+        return Result.isOk(resList,docs.totalHits);
+    }
+
+    /** 多索引窗口关键字查询 **/
+    @SuppressWarnings("all")
+    public Result    multiKeywordQuery(QueryCondition queryParser) throws ParseException, IOException {
+        String  root=properties.getIndexPath();
+        List<DirectoryReader> list=new ArrayList<>();
+        for(String category: SearchType.list()){
+            try {
+                list.add(DirectoryReader.open(FSDirectory.open(new File(root+File.separator+category))));
+            } catch (IOException e) {
+                continue;
+            }
+        }
+        MultiReader  multiReader=new MultiReader(list.toArray(new DirectoryReader[list.size()]));
+        IndexSearcher indexSearcher=new IndexSearcher(multiReader);
+        String value= DateUtils.getDefaultDate();
+        /*RangeParser parser=new RangeParser(Version.LUCENE_35,"data",new StandardAnalyzer(Version.LUCENE_35));
+        Query  query=parser.parse(queryParser.getKeyword());*/
+        String [] fields=LuceneFormatter.listFields();
+        IKAnalyzer ikAnalyzer=new IKAnalyzer();
+        MultiFieldQueryParser multiFieldQueryParser=new MultiFieldQueryParser(Version.LUCENE_CURRENT,fields,ikAnalyzer);
+        Query query=multiFieldQueryParser.parse(queryParser.getKeyword());
+
+        SortField  rank=new SortField("rank",SortField.Type.INT,false);
+        SortField  like=new SortField("like",SortField.Type.INT,true);
+        SortField  date =new SortField("date",SortField.Type.LONG,true);
+        SortField  focus =new SortField("focus",SortField.Type.INT,true);
+        SortField  browse =new SortField("browse",SortField.Type.INT,true);
+        SortField  comment =new SortField("comment",SortField.Type.INT,true);
+        Sort  sort=new Sort(rank,like,date,focus,browse,comment);
+
+        TopFieldCollector collector =  TopFieldCollector.create(sort, 10000, true, true, false, false);
+        //TopScoreDocCollector collector = TopScoreDocCollector.create(10000, false);
+        TopDocs docs=null;
+        if(queryParser.getPage()==null||queryParser.getPage()==0){
+            docs= indexSearcher.search(query,10000,sort);
+        }else {
+            indexSearcher.search(query,collector);
+            docs =collector.topDocs(queryParser.getPage(),queryParser.getPageSize());
+        }
+        System.out.println("size大小"+queryParser.getPage()+";pagesize"+queryParser.getPageSize());
+        List<JSONObject> resList=new ArrayList<>();
+        JSONObject obj=null;
+        //topDocs(1);
+
+        for(ScoreDoc doc:docs.scoreDocs){
+            obj=new JSONObject();
+            int  index=doc.doc;
+            Document document=indexSearcher.doc(index);
+            for(String key:LuceneFormatter.listFields()){
                 obj.put(key,document.get(key));
             }
             resList.add(obj);
@@ -436,10 +542,9 @@ public class LuceneReaderService {
         if(multiReader!=null){
             multiReader.close();
         }
-
-        return Result.isOk(resList);
+        System.out.println("docs.totalHits:"+docs.totalHits);
+        return Result.isOk(resList,docs.totalHits);
     }
-
 
 
     /**  切换索引reader 使用reopen **/
