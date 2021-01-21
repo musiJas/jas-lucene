@@ -30,7 +30,7 @@ public class demo2 {
         String  resource="D:\\data\\text";
         String  index="D:\\data\\index";
         String  key="date";
-        String  value="date:[2020-08-18 TO 2020-09-19]";
+        String  value="date:[2021-01-01 TO 2021-01-19]";
         //String  value="like:[10 TO 100]";
 
         long  startTime= System.currentTimeMillis();
@@ -77,7 +77,7 @@ public class demo2 {
     }
 
     public  static  String  queryNumericResult(String field,String value) throws ParseException, java.text.ParseException {
-        RangeParser parser=new RangeParser(Version.LUCENE_35,field,new StandardAnalyzer(Version.LUCENE_35));
+        RangeParser parser=new RangeParser(Version.LUCENE_47,field,new IKAnalyzer());
         Query  query=parser.parse(value);
         executeQuery(query);
         return "";
@@ -96,6 +96,7 @@ public class demo2 {
             Query  query=qp.parse(key);
             bq.add(query, BooleanClause.Occur.MUST);
             bq.add(query1, BooleanClause.Occur.MUST);*/
+
             TopDocs docs= indexSearcher.search(query,10000);
             System.out.println("docs.size="+docs.scoreDocs.length);
             for(ScoreDoc doc:docs.scoreDocs){

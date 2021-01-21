@@ -247,6 +247,7 @@
                     <include>mapper/**/*.xml</include>
                     <include>static/**</include>
                     <include>templates/**</include>
+                    <include>**.properties</include>
                     <!-- 如果各个环境的jks都是一样，则可以直接打入到启动jar包中 -->
                     <!--<include>test.jks</include>-->
                 </includes>
@@ -257,8 +258,10 @@
                 <filtering>true</filtering>
                 <targetPath>config</targetPath>
                 <includes>
-                    <include>application.yml</include>
-                    <include>application-${profileActive}.yml</include>
+                   <!-- <include>application.yml</include>
+                    <include>application-${profileActive}.yml</include>-->
+                    <include>application.properties</include>
+                    <include>application-${profileActive}.properties</include>
                     <include>**/*.properties</include>
                     <!-- 如果各个环境的jks不一样，则配置到外部config目录中
                         java代码中通过ClassPathFileUtil.getFile()获取 -->

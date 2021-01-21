@@ -104,13 +104,14 @@ public class LuceneSearchController {
     @RequestMapping("/api/searchByDay")
     @ResponseBody
     public Result searchByToDay(
-            @RequestParam(value = "keyword",required = false) String keyword,
-            @RequestParam(value = "category",required = false) String category,
+            @RequestParam(value = "category",required = true) String category,
             @RequestParam(value = "page",required = false, defaultValue = "0") int  page,
             @RequestParam(value = "pageSize",required = false,defaultValue = "20") int pageSize
     ) {
         QueryCondition   queryCondition=new QueryCondition(page,pageSize);
         queryCondition.setCategory(category);
+        queryCondition.setPage(page);
+        queryCondition.setPageSize(pageSize);
         Result res =searchService.defaultCategorySearch(queryCondition);
         return res;
     }

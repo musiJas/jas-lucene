@@ -38,11 +38,11 @@ public class demo3 {
         String  resource="D:\\data\\text";
         String  index="D:\\data\\index";
         String  key="date";
-        String  value="date:[2020-08-18 TO 2020-08-19]";
+        String  value="date:[2021-01-12 TO 2021-01-20]";
         //String  value="like:[10 TO 100]";
-
+        openResource("hotspot");
         long  startTime= System.currentTimeMillis();
-        changeResource("cnblogs");
+        //changeResource("cnblogs");
         String contentTitle="title";
         String  content="特朗普";
         //String  content="title:codermy";
@@ -50,7 +50,7 @@ public class demo3 {
         //multiFieldQueryParser(multi,content);
         //queryStringResult(contentTitle,content);
         //queryIndex(index,key);
-         //queryNumericResult(key,value);
+         queryNumericResult(key,value);
         /*try {
             createIndex(index,resource);
         } catch (IOException e) {
@@ -59,6 +59,17 @@ public class demo3 {
         long  endTime= System.currentTimeMillis();
         System.out.println("总共耗时："+(endTime-startTime));
     }
+
+    public  static void  openResource(String category){
+        try {
+            directory= FSDirectory.open(new File(indexStaticRoot+category));
+            dr=DirectoryReader.open(directory);
+            indexSearcher=new IndexSearcher(dr);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
 
     /****/
 

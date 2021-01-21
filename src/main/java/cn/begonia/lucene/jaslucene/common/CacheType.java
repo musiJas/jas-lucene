@@ -1,5 +1,12 @@
 package cn.begonia.lucene.jaslucene.common;
 
+import cn.begonia.lucene.jaslucene.famatter.formatter.CnblogsFormatter;
+import cn.begonia.lucene.jaslucene.famatter.formatter.HotspotFormatter;
+import cn.begonia.lucene.jaslucene.famatter.formatter.MovieFormatter;
+import cn.begonia.lucene.jaslucene.famatter.formatter.ReadingFormatter;
+import org.apache.commons.lang.StringUtils;
+import sun.misc.Cache;
+
 /**
  * @author begonia_chen
  * @data 2020/8/19 9:13
@@ -7,16 +14,21 @@ package cn.begonia.lucene.jaslucene.common;
  **/
 public enum   CacheType {
 
-     cnblogs("cnblogs","博客类型"),
-     hotspot("hotspot","热点信息");
-
+     cnblogs("cnblogs","博客类型", CnblogsFormatter.class),
+     hotspot("hotspot","热点信息", HotspotFormatter.class),
+     life("life","生活类-包含常识等", CacheType.class),
+     reading("reading","阅读指导", ReadingFormatter.class),
+     movie("movie","高分movie指导", MovieFormatter.class),
+     journey("journey","旅行指导",CacheType.class);
     private  String  key;
     private  String  description;
+    private  Class  cls;
 
 
-    CacheType(String key,String description) {
+    CacheType(String key,String description,Class cls) {
         this.key=key;
         this.description=description;
+        this.cls=cls;
     }
 
     public String getKey() {
@@ -25,6 +37,22 @@ public enum   CacheType {
 
     public void setKey(String key) {
         this.key = key;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public Class getCls() {
+        return cls;
+    }
+
+    public void setCls(Class cls) {
+        this.cls = cls;
     }
 
 

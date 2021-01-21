@@ -15,28 +15,28 @@ import java.io.File;
 
 /**
  * @author begonia_chen
- * @data 2020/8/19 10:26
- * @description
+ * @data 2020/8/17 11:10
+ * @description redis生成索引的方法
  **/
 @Slf4j
 @Component
 @PropertySource("classpath:application.properties")
-public class HotspotCreateIndexJob {
+public class ReadingCreateIndexJob {
 
     @Autowired
-    ContextProperties contextProperties;
+    ContextProperties   contextProperties;
     @Autowired
-    LuceneWriterService luceneWriterService;
+    LuceneWriterService  luceneWriterService;
 
 
     //@Scheduled(cron=" 0 15 10 ? * SUN-SAT")
-    @Scheduled(cron = "${jobs.schedule}")
-    //@Scheduled(fixedRate = 30000)
+    //@Scheduled(cron = "${jobs.schedule}")
+    @Scheduled(fixedRate = 30000)
     public  void  startCreateIndex(){
-        log.info("开始创建索引数据.{}"+CacheType.hotspot.getKey());
-        RedisSource redisSource=new RedisSource();
-        redisSource.setKey(CacheType.hotspot.getKey());
-        redisSource.setIndexPath(contextProperties.getIndexPath()+ File.separator+CacheType.hotspot.getKey());
+        log.info("开始创建索引数据.{}"+CacheType.reading.getKey());
+        RedisSource  redisSource=new RedisSource();
+        redisSource.setKey(CacheType.reading.getKey());
+        redisSource.setIndexPath(contextProperties.getIndexPath()+ File.separator+CacheType.reading.getKey());
         redisSource.setType(ResourceType.redis);
         luceneWriterService.createIndex(redisSource);
         log.info("结束创建索引数据.");

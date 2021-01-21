@@ -44,7 +44,7 @@ public class MultiSearch {
         String  value="date:[2020-08-18 TO 2020-11-19]";
         RangeParser parser=new RangeParser(Version.LUCENE_35,field,new StandardAnalyzer(Version.LUCENE_35));
         Query  query=parser.parse(value);*/
-        String  queryCondition1="80岁老人";
+        String  queryCondition1="四川教授";
         String [] fields=new String[]{"title","content","auth"};
         IKAnalyzer ikAnalyzer=new IKAnalyzer();
         MultiFieldQueryParser multiFieldQueryParser=new MultiFieldQueryParser(Version.LUCENE_CURRENT,fields,ikAnalyzer);

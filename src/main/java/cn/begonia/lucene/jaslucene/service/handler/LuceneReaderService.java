@@ -71,10 +71,21 @@ public class LuceneReaderService {
     public    Result  numericQuery(String field,String expression,QueryCondition queryCondition) throws ParseException {
         RangeParser parser=new RangeParser(Version.LUCENE_CURRENT,field,new StandardAnalyzer(Version.LUCENE_CURRENT));
         Query  query=parser.parse(expression);
-
-
         return executeQuery(query,queryCondition);
     }
+
+    public     Result  queryNumericResult(String field,String value,QueryCondition queryCondition) throws ParseException, java.text.ParseException {
+        RangeParser parser=new RangeParser(Version.LUCENE_35,field,new StandardAnalyzer(Version.LUCENE_35));
+        Query  query=parser.parse(value);
+      /*  QueryCondition  queryCondition=new QueryCondition();
+        queryCondition.setPage(page);
+        queryCondition.setPageSize(pageSize);
+        SortField  date=new SortField("date",SortField.Type.LONG,true);
+        Sort  sort=new Sort(date);
+        queryCondition.setSort(sort);*/
+        return querySearchByDay(query,queryCondition);
+    }
+
 
     /**
      * 执行查询，并打印查询到的记录数
@@ -114,7 +125,8 @@ public class LuceneReaderService {
                 obj.put("title",document.get("title"));
                 obj.put("url",document.get("url"));
                 obj.put("auth",document.get("auth"));
-                obj.put("date",document.get("date"));
+                Long  times=Long.parseLong(document.get("date"));
+                obj.put("date",DateUtils.format(new Date(times)));
                 obj.put("like",document.get("like"));
                 obj.put("comment",document.get("comment"));
                 obj.put("browse",document.get("browse"));
@@ -128,6 +140,64 @@ public class LuceneReaderService {
             e.printStackTrace();
         }
         return Result.isOk(list);
+    }
+
+
+    /**
+     * 执行查询，并打印查询到的记录数
+     * @param query
+     * @throws IOException
+     */
+    @SuppressWarnings("all")
+    public  Result  querySearchByDay(Query query,QueryCondition condition){
+        List<JSONObject> list=new ArrayList<>();
+        try {
+            SortField  date =new SortField("date",SortField.Type.LONG,true);
+            Sort  sort=new Sort(date);
+            TopFieldCollector collector =  TopFieldCollector.create(sort, 10000, true, true, false, false);
+            //TopScoreDocCollector collector = TopScoreDocCollector.create(10000, false);
+            TopDocs docs=null;
+            if(condition.getPage()==null||condition.getPage()==0){
+                docs= indexSearcher.search(query,10000,sort);
+            }else {
+                indexSearcher.search(query,collector);
+                docs =collector.topDocs(condition.getPage(),condition.getPageSize());
+            }
+            //打印查询到的记录数
+            System.out.println("总共查询到" + docs.totalHits + "个文档");
+            for (ScoreDoc scoreDoc : docs.scoreDocs) {
+                JSONObject obj=new JSONObject();
+                //取得对应的文档对象
+                Document document = indexSearcher.doc(scoreDoc.doc);
+              /*  List<IndexableField> list= document.getFields();
+                for(IndexableField field:list){
+                    //System.out.println(field.name());
+                }*/
+                obj= LuceneFormatter.getReturnJson("",document);
+                list.add(obj);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return Result.isOk(list);
+    }
+
+
+    public static void main(String[] args) {
+        RangeParser parser=new RangeParser(Version.LUCENE_35,"date",new StandardAnalyzer(Version.LUCENE_35));
+        try {
+            LuceneReaderService  luceneReaderService = new  LuceneReaderService();
+            luceneReaderService.openResourceByDay("hotspot");
+            Query  query=parser.parse("date:[2021-01-12 TO 2021-08-19]");
+            QueryCondition  condition=new QueryCondition();
+            /*condition.setPage(1);
+            condition.setPageSize(20);*/
+            luceneReaderService.querySearchByDay(query,condition);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+
     }
 
 
@@ -351,10 +421,10 @@ public class LuceneReaderService {
 
     }
 
-   /* *//** 直接打开索引
+  /** 直接打开索引
      * @request indexPath
-     * **//*
-    public  void  openResource(String  indexPath){
+     * **/
+    /*public  void  openResource(String  indexPath){
         try {
             fsDirectory= FSDirectory.open(new File(indexPath));
             directoryReader=DirectoryReader.open(fsDirectory);

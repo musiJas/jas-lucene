@@ -1,29 +1,20 @@
-package cn.begonia.lucene.jaslucene.famatter;
+package cn.begonia.lucene.jaslucene.famatter.formatter;
 
-import cn.begonia.lucene.jaslucene.common.CacheType;
-import cn.begonia.lucene.jaslucene.famatter.formatter.CnblogsFormatter;
-import cn.begonia.lucene.jaslucene.famatter.formatter.HotspotFormatter;
-import cn.begonia.lucene.jaslucene.famatter.formatter.MovieFormatter;
-import cn.begonia.lucene.jaslucene.famatter.formatter.ReadingFormatter;
+import cn.begonia.lucene.jaslucene.famatter.LuceneFormatter;
 import cn.begonia.lucene.jaslucene.util.DateUtils;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.document.*;
-import org.apache.lucene.document.Field.Store;
+
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
-/**
- * @author begonia_chen
- * @data 2020/8/18 13:03
- * @description
- **/
-@SuppressWarnings("all")
-public enum LuceneFormatter  {
- /*   Field.Index.ANALYZED:分词建索引
+public enum  CnblogsFormatter {
+/*   Field.Index.ANALYZED:分词建索引
     Field.Index.ANALYZED_NO_NORMS:分词建索引，但是Field的值不像通常那样被保存，而是只取一个byte，这样节约存储空间(ANALYZED存储了index time,boost information等norms，而ANALYZED_NO_NORMS不存储)
     Field.Index.NOT_ANALYZED:不分词且索引,即不使用 analyzer分析，整体作为一个token，常用语精确匹配，例如文件名，ID号等就用这个
     Field.Index.NOT_ANALYZED_NO_NORMS:不分词建索引，Field的值去一个byte保存*/
@@ -36,37 +27,19 @@ public enum LuceneFormatter  {
     comment("comment", IntField.class,Field.Store.YES,Field.Index.NOT_ANALYZED,1.0f),
     browse("browse",IntField.class,Field.Store.YES,Field.Index.NOT_ANALYZED,1.0f),
     content("content",TextField.class, Field.Store.YES,Field.Index.ANALYZED,3.0f),
-    img("img",TextField.class,Field.Store.YES, Field.Index.NOT_ANALYZED,1.0f),
-    focus("focus",IntField.class,Field.Store.YES, Field.Index.NOT_ANALYZED,1.0f),
-    rank("rank",IntField.class,Field.Store.YES, Field.Index.NOT_ANALYZED,1.0f),
-
-    score("score",StringField.class,Field.Store.YES, Field.Index.NOT_ANALYZED,1.0f),
-    star("star",StringField.class,Field.Store.YES, Field.Index.NOT_ANALYZED,1.0f),
-    release("release",StringField.class,Field.Store.YES, Field.Index.NOT_ANALYZED,1.0f),
-    duration("duration",TextField.class,Field.Store.YES, Field.Index.NOT_ANALYZED,3.0f),
-    region("region",TextField.class,Field.Store.YES, Field.Index.ANALYZED,1.0f),
-    director("director",TextField.class,Field.Store.YES, Field.Index.NOT_ANALYZED,1.0f),
-    actor("actor",TextField.class,Field.Store.YES, Field.Index.NOT_ANALYZED,5.0f),
-    info("info",TextField.class,Field.Store.YES, Field.Index.ANALYZED_NO_NORMS,1.0f),
-    id("id",IntField.class,Field.Store.YES, Field.Index.NOT_ANALYZED,1.0f),
-    category("category",TextField.class,Field.Store.YES, Field.Index.NOT_ANALYZED,1.0f),
-    releaseDate("releaseDate",TextField.class,Field.Store.YES, Field.Index.NOT_ANALYZED,1.0f),
-    author("author",TextField.class,Field.Store.YES, Field.Index.NOT_ANALYZED,1.0f),
-    detail("detail",TextField.class,Field.Store.YES, Field.Index.NOT_ANALYZED,1.0f),
-    type("type",TextField.class,Field.Store.YES, Field.Index.NOT_ANALYZED,1.0f);
-
+    img("img",TextField.class,Field.Store.YES, Field.Index.NOT_ANALYZED,1.0f);
 
     private  String  field;
     private  Class  fieldType;
     private  Field.Store  storeValue;
     private  Field.Index  indexValue;
     private  float    boost;
-    LuceneFormatter(){
+    CnblogsFormatter(){
 
     }
 
 
-    LuceneFormatter(String field, Class fieldType, Field.Store  storeValue, Field.Index indexValue, Float  boost){
+    CnblogsFormatter(String field, Class fieldType, Field.Store  storeValue, Field.Index indexValue, Float  boost){
         this.field=field;
         this.fieldType=fieldType;
         this.storeValue=storeValue;
@@ -77,42 +50,44 @@ public enum LuceneFormatter  {
 
     public static  String[]  listFields(){
         List<String> list=new ArrayList<>();
-        for(LuceneFormatter matter:LuceneFormatter.values()){
+        for(CnblogsFormatter matter:CnblogsFormatter.values()){
             list.add(matter.field);
         }
         return  list.toArray(new String[list.size()]);
     }
 
-    public static JSONObject  getReturnJson(String category,Document  document){
-        if(StringUtils.equals(CacheType.cnblogs.getKey(),category)){
-             return    CnblogsFormatter.resolveDocument(document);
-        }else if(StringUtils.equals(CacheType.hotspot.getKey(),category)) {
-            return    HotspotFormatter.resolveDocument(document);
-        }else if(StringUtils.equals(CacheType.movie.getKey(),category)){
-            return    MovieFormatter.resolveDocument(document);
-        }else if(StringUtils.equals(CacheType.reading.getKey(),category)){
-            return    ReadingFormatter.resolveDocument(document);
-        }
-        return null;
+    public static JSONObject  resolveDocument(Document  document){
+          JSONObject json=new JSONObject();
+         for(CnblogsFormatter  formatter:CnblogsFormatter.values()){
+             // 对date做格式转换
+             if(StringUtils.equals(formatter.field,"date")){
+                 Long  times=Long.parseLong(document.get("date"));
+                 json.put(formatter.field,DateUtils.format(new Date(times)));
+             }else {
+                 json.put(formatter.field,document.get(formatter.field));
+             }
+         }
+        return json;
     }
 
 
-    public static  Field   initialFormatter(String field,String value){
+
+    public static Field initialFormatter(String field, String value){
         /*Field  field1=new TextField("","",null);
         field1.setBoost(5.0f);*/
-        for(LuceneFormatter bf: LuceneFormatter.values()){
+        for(CnblogsFormatter bf: CnblogsFormatter.values()){
             if(StringUtils.equals(field,bf.field)){
                 try {
                     Constructor<Field> constructor=null;
                     Field fs=null;
                     if(StringUtils.equals(bf.fieldType.getName(),IntField.class.getName())){
-                        constructor=bf.fieldType.getConstructor(String.class,int.class, Store.class);
+                        constructor=bf.fieldType.getConstructor(String.class,int.class, Field.Store.class);
                         fs= constructor.newInstance(field,Integer.parseInt(value),bf.storeValue);
                     }else if(StringUtils.equals(bf.fieldType.getName(),LongField.class.getName())){
-                        constructor=bf.fieldType.getConstructor(String.class,long.class, Store.class);
+                        constructor=bf.fieldType.getConstructor(String.class,long.class, Field.Store.class);
                         fs= constructor.newInstance(field, DateUtils.parse(value,"yyyy-MM-dd HH:mm").getTime(),bf.storeValue);
                     }else {
-                        constructor=bf.fieldType.getConstructor(String.class,String.class, Store.class);
+                        constructor=bf.fieldType.getConstructor(String.class,String.class, Field.Store.class);
                         fs= constructor.newInstance(field,value,bf.storeValue);
                         fs.setBoost(bf.boost);// 更新权重,默认是1.0f
                     }

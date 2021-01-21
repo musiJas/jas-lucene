@@ -59,9 +59,12 @@ public class SearchServiceImpl  implements ISearchService {
     public Result defaultCategorySearch(QueryCondition queryParser) {
         Result  result=null;
         try {
+            SortField  date=new SortField("date",SortField.Type.LONG,true);
+            Sort  sort=new Sort(date);
             Result rest=luceneReaderService.openResourceByDay(queryParser.getCategory());
             if(rest.getCode()==200){
-                result =luceneReaderService.numericQuery("date",DateUtils.getDefaultDate(),queryParser);
+                queryParser.setSort(sort);
+                result =luceneReaderService.queryNumericResult("date",DateUtils.getDefaultDate(),queryParser);
             }else {
                 return  rest;
             }
@@ -70,8 +73,12 @@ public class SearchServiceImpl  implements ISearchService {
         } catch (ParseException e) {
             e.printStackTrace();
             return  Result.isFail();
+        } catch (java.text.ParseException e) {
+            e.printStackTrace();
         }
+        return null;
     }
+
 
     /** 在所有的索引中查询**/
     @Override

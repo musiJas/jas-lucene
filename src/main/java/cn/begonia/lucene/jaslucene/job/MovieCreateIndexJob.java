@@ -7,6 +7,7 @@ import cn.begonia.lucene.jaslucene.resourece.RedisSource;
 import cn.begonia.lucene.jaslucene.service.handler.LuceneWriterService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -19,7 +20,8 @@ import java.io.File;
  **/
 @Slf4j
 @Component
-public class RedisCreateIndexJob {
+@PropertySource("classpath:application.properties")
+public class MovieCreateIndexJob {
 
     @Autowired
     ContextProperties   contextProperties;
@@ -27,13 +29,14 @@ public class RedisCreateIndexJob {
     LuceneWriterService  luceneWriterService;
 
 
-    @Scheduled(cron=" 0 15 10 ? * SUN-SAT")
-    //@Scheduled(fixedRate = 3000)
+    //@Scheduled(cron=" 0 15 10 ? * SUN-SAT")
+    //@Scheduled(cron = "${jobs.schedule}")
+    @Scheduled(fixedRate = 40000)
     public  void  startCreateIndex(){
-        log.info("开始创建索引数据.");
+        log.info("开始创建索引数据.{}",CacheType.movie.getKey());
         RedisSource  redisSource=new RedisSource();
-        redisSource.setKey(CacheType.cnblogs.getKey());
-        redisSource.setIndexPath(contextProperties.getIndexPath()+ File.separator+CacheType.cnblogs.getKey());
+        redisSource.setKey(CacheType.movie.getKey());
+        redisSource.setIndexPath(contextProperties.getIndexPath()+ File.separator+CacheType.movie.getKey());
         redisSource.setType(ResourceType.redis);
         luceneWriterService.createIndex(redisSource);
         log.info("结束创建索引数据.");
