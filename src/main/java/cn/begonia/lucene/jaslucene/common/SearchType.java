@@ -2,8 +2,7 @@ package cn.begonia.lucene.jaslucene.common;
 
 import com.alibaba.fastjson.JSONObject;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author begonia_chen
@@ -11,8 +10,8 @@ import java.util.List;
  * @description  查找的分类
  **/
 public enum SearchType {
-    blog("cnblogs","博客类型"),
     hotspot("hotspot","热点数据"),
+    blog("cnblogs","博客类型"),
     life("life","生活类-包含常识等"),
     reading("reading","阅读指导"),
     movie("movie","高分movie指导"),
@@ -59,11 +58,12 @@ public enum SearchType {
     }
 
 
-    public static JSONObject  listObject(){
-        JSONObject  obj=new JSONObject();
+    public static JSONObject listObject(){
+         JSONObject  map=new JSONObject(true);
         for(SearchType type:SearchType.values()){
-            obj.put(type.getCategory(),type.getDescription());
+            System.out.println(type.getCategory());
+            map.put(type.getCategory(),type.getDescription());
         }
-        return obj;
+        return map;
     }
 }

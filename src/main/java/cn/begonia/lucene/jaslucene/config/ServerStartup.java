@@ -10,8 +10,6 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.RequestAttribute;
-import org.springframework.web.context.request.RequestAttributes;
 
 import java.io.File;
 
@@ -32,7 +30,7 @@ public class ServerStartup implements ApplicationContextAware, CommandLineRunner
                 LuceneWriterService  service=applicationContext.getBean(LuceneWriterService.class);
                 service.openResource(rs);
                 LuceneReaderService   readerService=applicationContext.getBean(LuceneReaderService.class);
-                //readerService.openResource(rs);
+                readerService.openResource(rs);
             }
         }*/
     }

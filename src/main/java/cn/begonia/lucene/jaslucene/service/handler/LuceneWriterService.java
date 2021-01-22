@@ -35,7 +35,7 @@ public class LuceneWriterService {
 
     /** 初始化时会调用一次 **/
     @SuppressWarnings("all")
-    public synchronized   void   openResource(ResourceAttribute  attribute){
+    public  void   openResource(ResourceAttribute  attribute){
         try {
             FSDirectory fsDirectory= FSDirectory.open(new File(attribute.getIndexPath()));
             IKAnalyzer ikAnalyzer=new IKAnalyzer();

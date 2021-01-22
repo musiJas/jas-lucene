@@ -3,6 +3,7 @@ package cn.begonia.lucene.jaslucene.web;
 import cn.begonia.lucene.jaslucene.common.Result;
 import cn.begonia.lucene.jaslucene.common.SearchType;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.parser.Feature;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -36,5 +37,13 @@ public class HealthController {
     @RequestMapping("/category")
     public Result   category(){
         return Result.isOk(SearchType.listObject());
+    }
+
+
+    public static void main(String[] args) {
+        String ss=SearchType.listObject().toString();
+        JSONObject obj=JSONObject.parseObject(ss,Feature.OrderedField);
+        System.out.println(obj);
+
     }
 }

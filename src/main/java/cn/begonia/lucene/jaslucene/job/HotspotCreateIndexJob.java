@@ -32,7 +32,7 @@ public class HotspotCreateIndexJob {
     //@Scheduled(cron=" 0 15 10 ? * SUN-SAT")
     //@Scheduled(cron = "${jobs.schedule}")
     //@Scheduled(fixedRate = 40000)
-    @Scheduled(fixedRate = 30000)
+    //@Scheduled(fixedRate = 3000)
     public  void  startCreateIndex(){
         log.info("开始创建索引数据.{}"+CacheType.hotspot.getKey());
         RedisSource redisSource=new RedisSource();

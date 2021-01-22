@@ -31,7 +31,7 @@ public class LifeCreateIndexJob {
 
     //@Scheduled(cron=" 0 15 10 ? * SUN-SAT")
     //@Scheduled(cron = "${jobs.schedule}")
-    @Scheduled(fixedRate = 5000)
+    @Scheduled(fixedRate = 1000)
     public  void  startCreateIndex(){
         log.info("开始创建索引数据.{}"+CacheType.life.getKey());
         RedisSource  redisSource=new RedisSource();

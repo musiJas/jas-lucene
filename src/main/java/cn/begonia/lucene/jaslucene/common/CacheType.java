@@ -14,8 +14,8 @@ import sun.misc.Cache;
  **/
 public enum   CacheType {
 
-     cnblogs("cnblogs","博客类型", CnblogsFormatter.class),
-     hotspot("hotspot","热点信息", HotspotFormatter.class),
+    hotspot("hotspot","热点信息", HotspotFormatter.class),
+    cnblogs("cnblogs","博客类型", CnblogsFormatter.class),
      life("life","生活类-包含常识等", CacheType.class),
      reading("reading","阅读指导", ReadingFormatter.class),
      movie("movie","高分movie指导", MovieFormatter.class),

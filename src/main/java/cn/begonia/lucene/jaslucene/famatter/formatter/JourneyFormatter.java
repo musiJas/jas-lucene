@@ -18,11 +18,11 @@ public enum JourneyFormatter {
 
     title("title", TextField.class, Field.Store.YES,Field.Index.ANALYZED,5.0f),
     img("img", StringField.class,Field.Store.YES,Field.Index.NOT_ANALYZED,1.0f),
-    ids("ids",StringField.class,Field.Store.YES, Field.Index.NOT_ANALYZED,1.0f),
+    ids("id",StringField.class,Field.Store.YES, Field.Index.NOT_ANALYZED,1.0f),
     category("category",StringField.class,Field.Store.YES, Field.Index.NOT_ANALYZED,1.0f),
     info("info",StringField.class,Field.Store.YES, Field.Index.NOT_ANALYZED,1.0f),
     focus("focus",IntField.class,Field.Store.YES, Field.Index.NOT_ANALYZED,1.0f),
-    detail("details",StringField.class,Field.Store.YES, Field.Index.NOT_ANALYZED,1.0f),
+    detail("detail",StringField.class,Field.Store.YES, Field.Index.NOT_ANALYZED,1.0f),
     date("date", LongField.class,Field.Store.YES,Field.Index.ANALYZED,1.0f);
 
 
@@ -70,7 +70,7 @@ public enum JourneyFormatter {
         JSONObject json=new JSONObject();
         for(JourneyFormatter formatter: JourneyFormatter.values()){
             // 对date做格式转换
-            if(StringUtils.equals(formatter.field,"focus")){
+            if(StringUtils.equals(formatter.field,"date")){
                 Long  times=Long.parseLong(document.get("date"));
                 json.put(formatter.field,DateUtils.format(new Date(times)));
             }else {

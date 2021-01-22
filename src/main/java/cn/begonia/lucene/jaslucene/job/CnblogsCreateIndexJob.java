@@ -31,7 +31,7 @@ public class CnblogsCreateIndexJob {
 
     //@Scheduled(cron=" 0 15 10 ? * SUN-SAT")
     //@Scheduled(cron = "${jobs.schedule}")
-    @Scheduled(fixedRate = 100000)
+    //@Scheduled(fixedRate = 10000)
     public  void  startCreateIndex(){
         log.info("开始创建索引数据.{}"+CacheType.cnblogs.getKey());
         RedisSource  redisSource=new RedisSource();
