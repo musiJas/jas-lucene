@@ -31,18 +31,7 @@ public class RedisConvertServiceImpl implements DocumentConvert  {
     @Autowired
     CacheUtils  cacheUtils;
 
-    @Override
-    public void convertHandlerDocument(ResourceAttribute attribute) {
-        IndexWriter indexWriter = attribute.getWriter();
-        RedisSource  rs= (RedisSource) attribute;
-        String keys=rs.getKey();
-        if(StringUtils.isNotEmpty(keys)){
-            Map<Object, Object>  map=cacheUtils.hgetAll(keys);
-            createIndex(indexWriter,map);
-        }
-    }
-
-    public  void   createIndex(IndexWriter indexWriter,Map<Object,Object> map)   {
+    public  void   createIndex(IndexWriter indexWriter,Map<Object,Object> map,String category)   {
         Document doc=null;
         for(Map.Entry<Object,Object> ty:map.entrySet()){
             String key=String.valueOf(ty.getKey());
@@ -51,13 +40,15 @@ public class RedisConvertServiceImpl implements DocumentConvert  {
             doc.add(new Field("id",key, Field.Store.YES, Field.Index.NOT_ANALYZED));
             for(Map.Entry<String, Object> ob:obj.entrySet()){
                 //Field field = new TextField(ob.getKey(), String.valueOf(ob.getValue()), Field.Store.YES);
-                doc.add(LuceneFormatter.initialFormatter(ob.getKey(),String.valueOf(ob.getValue())));
+                Field field =LuceneFormatter.initialFormatter(ob.getKey(),String.valueOf(ob.getValue()),category);
+                doc.add(field);
+              /*  doc.add(LuceneFormatter.initialFormatter(ob.getKey(),String.valueOf(ob.getValue())));*/
             }
             try {
                 IKAnalyzer  ikAnalyzer=new IKAnalyzer(true);
-                System.out.println(key);
                 Term  term=new Term("id",key);
                 indexWriter.updateDocument(term,doc,ikAnalyzer);
+                indexWriter.commit();
                 //indexWriter.addDocument(doc);
             } catch (IOException e) {
                 log.debug("key "+ty.getKey()+"建立索引失败...");
@@ -68,6 +59,17 @@ public class RedisConvertServiceImpl implements DocumentConvert  {
             indexWriter.close();
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void convertHandlerDocument(ResourceAttribute attribute) {
+        IndexWriter indexWriter = attribute.getWriter();
+        RedisSource  rs= (RedisSource) attribute;
+        String keys=rs.getCategory();
+        if(StringUtils.isNotEmpty(keys)){
+            Map<Object, Object>  map=cacheUtils.hgetAll(keys);
+            createIndex(indexWriter,map,attribute.getCategory());
         }
     }
 }

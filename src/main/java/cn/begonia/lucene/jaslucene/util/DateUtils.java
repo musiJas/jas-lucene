@@ -27,6 +27,11 @@ public class DateUtils {
         return  local.get().format(date);
     }
 
+    public static String  formatMM(Date  date){
+        local.set(new SimpleDateFormat("yyyy-MM-dd HH:mm"));
+        //String format="yyyy-MM-dd HH:mm:ss";
+        return  local.get().format(date);
+    }
 
     public static  Date  parse(String date) throws ParseException {
         local.set(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"));

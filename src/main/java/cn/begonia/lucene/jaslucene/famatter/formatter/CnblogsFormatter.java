@@ -5,13 +5,10 @@ import cn.begonia.lucene.jaslucene.util.DateUtils;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.document.*;
+import org.apache.lucene.search.Sort;
+import org.apache.lucene.search.SortField;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 public enum  CnblogsFormatter {
 /*   Field.Index.ANALYZED:分词建索引
@@ -56,6 +53,17 @@ public enum  CnblogsFormatter {
         return  list.toArray(new String[list.size()]);
     }
 
+    @SuppressWarnings("all")
+    public Map<String,Object> toMap() {
+        Map<String,Object>  map = new HashMap<>();
+        map.put("field",field);
+        map.put("fieldType",fieldType);
+        map.put("storeValue",storeValue);
+        map.put("indexValue",indexValue);
+        map.put("boost",boost);
+        return map;
+    }
+
     public static JSONObject  resolveDocument(Document  document){
           JSONObject json=new JSONObject();
          for(CnblogsFormatter  formatter:CnblogsFormatter.values()){
@@ -70,41 +78,19 @@ public enum  CnblogsFormatter {
         return json;
     }
 
+    /** 获取排序规则 **/
+    public  static Sort   getDefaultSort(){
+        SortField  like=new SortField("like",SortField.Type.INT,true);
+        SortField  date =new SortField("date",SortField.Type.LONG,true);
+        Sort  sort=new Sort(date,like);
+        return sort;
+    }
 
 
     public static Field initialFormatter(String field, String value){
-        /*Field  field1=new TextField("","",null);
-        field1.setBoost(5.0f);*/
         for(CnblogsFormatter bf: CnblogsFormatter.values()){
-            if(StringUtils.equals(field,bf.field)){
-                try {
-                    Constructor<Field> constructor=null;
-                    Field fs=null;
-                    if(StringUtils.equals(bf.fieldType.getName(),IntField.class.getName())){
-                        constructor=bf.fieldType.getConstructor(String.class,int.class, Field.Store.class);
-                        fs= constructor.newInstance(field,Integer.parseInt(value),bf.storeValue);
-                    }else if(StringUtils.equals(bf.fieldType.getName(),LongField.class.getName())){
-                        constructor=bf.fieldType.getConstructor(String.class,long.class, Field.Store.class);
-                        fs= constructor.newInstance(field, DateUtils.parse(value,"yyyy-MM-dd HH:mm").getTime(),bf.storeValue);
-                    }else {
-                        constructor=bf.fieldType.getConstructor(String.class,String.class, Field.Store.class);
-                        fs= constructor.newInstance(field,value,bf.storeValue);
-                        fs.setBoost(bf.boost);// 更新权重,默认是1.0f
-                    }
-                    return  fs;
-
-                } catch (NoSuchMethodException e) {
-                    e.printStackTrace();
-                } catch (InstantiationException e) {
-                    e.printStackTrace();
-                } catch (IllegalAccessException e) {
-                    e.printStackTrace();
-                } catch (InvocationTargetException e) {
-                    e.printStackTrace();
-                }catch (ParseException e) {
-                    e.printStackTrace();
-                }
-
+            if(StringUtils.equals(field,bf.field)) {
+               return LuceneFormatter.getField(field, value, bf.toMap(), bf.fieldType);
             }
         }
         return null;

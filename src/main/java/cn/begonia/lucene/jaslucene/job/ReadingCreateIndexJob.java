@@ -31,11 +31,11 @@ public class ReadingCreateIndexJob {
 
     //@Scheduled(cron=" 0 15 10 ? * SUN-SAT")
     //@Scheduled(cron = "${jobs.schedule}")
-    @Scheduled(fixedRate = 30000)
+    @Scheduled(fixedRate = 3000)
     public  void  startCreateIndex(){
         log.info("开始创建索引数据.{}"+CacheType.reading.getKey());
         RedisSource  redisSource=new RedisSource();
-        redisSource.setKey(CacheType.reading.getKey());
+        redisSource.setCategory(CacheType.reading.getKey());
         redisSource.setIndexPath(contextProperties.getIndexPath()+ File.separator+CacheType.reading.getKey());
         redisSource.setType(ResourceType.redis);
         luceneWriterService.createIndex(redisSource);

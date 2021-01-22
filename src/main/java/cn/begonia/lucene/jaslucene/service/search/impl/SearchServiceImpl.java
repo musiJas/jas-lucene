@@ -61,13 +61,13 @@ public class SearchServiceImpl  implements ISearchService {
         try {
             SortField  date=new SortField("date",SortField.Type.LONG,true);
             Sort  sort=new Sort(date);
-            Result rest=luceneReaderService.openResourceByDay(queryParser.getCategory());
-            if(rest.getCode()==200){
-                queryParser.setSort(sort);
-                result =luceneReaderService.queryNumericResult("date",DateUtils.getDefaultDate(),queryParser);
-            }else {
-                return  rest;
-            }
+            queryParser.setSort(sort);
+            result =luceneReaderService.queryNumericResult("date",DateUtils.getDefaultDate(),queryParser);
+            //Result rest=luceneReaderService.openResourceByDay(queryParser.getCategory());
+            //if(rest.getCode()==200){
+            //}else {
+                //return  rest;
+            //}
            // luceneReaderService.closeReader();
            return  result;
         } catch (ParseException e) {

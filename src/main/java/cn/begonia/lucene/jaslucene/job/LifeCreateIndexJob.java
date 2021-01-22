@@ -21,7 +21,7 @@ import java.io.File;
 @Slf4j
 @Component
 @PropertySource("classpath:application.properties")
-public class MovieCreateIndexJob {
+public class LifeCreateIndexJob {
 
     @Autowired
     ContextProperties   contextProperties;
@@ -31,12 +31,12 @@ public class MovieCreateIndexJob {
 
     //@Scheduled(cron=" 0 15 10 ? * SUN-SAT")
     //@Scheduled(cron = "${jobs.schedule}")
-    @Scheduled(fixedRate = 40000)
+    @Scheduled(fixedRate = 5000)
     public  void  startCreateIndex(){
-        log.info("开始创建索引数据.{}",CacheType.movie.getKey());
+        log.info("开始创建索引数据.{}"+CacheType.life.getKey());
         RedisSource  redisSource=new RedisSource();
-        redisSource.setCategory(CacheType.movie.getKey());
-        redisSource.setIndexPath(contextProperties.getIndexPath()+ File.separator+CacheType.movie.getKey());
+        redisSource.setCategory(CacheType.life.getKey());
+        redisSource.setIndexPath(contextProperties.getIndexPath()+ File.separator+CacheType.life.getKey());
         redisSource.setType(ResourceType.redis);
         luceneWriterService.createIndex(redisSource);
         log.info("结束创建索引数据.");

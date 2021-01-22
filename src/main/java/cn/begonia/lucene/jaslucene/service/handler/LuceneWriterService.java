@@ -11,8 +11,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.wltea.analyzer.lucene.IKAnalyzer;
 
+import javax.smartcardio.ATR;
 import java.io.File;
 import java.io.IOException;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  *  生成索引服务
@@ -22,41 +25,51 @@ import java.io.IOException;
 @Slf4j
 @Service
 public class LuceneWriterService {
-    private   FSDirectory  fsDirectory;
-    private   IndexWriter  indexWriter;
+    private   static   Map<String,IndexWriter>  indexWriterMap=new ConcurrentHashMap<>(16); // 存放indexWriter 并发问题
 
     @Autowired
     private ResourceFactory  resourceFactory;
 
-    public  void   openResource(String  indexPath){
+    private  static  final  Object obj=new Object();
+
+
+    /** 初始化时会调用一次 **/
+    @SuppressWarnings("all")
+    public synchronized   void   openResource(ResourceAttribute  attribute){
         try {
-            
-            fsDirectory= FSDirectory.open(new File(indexPath));
+            FSDirectory fsDirectory= FSDirectory.open(new File(attribute.getIndexPath()));
             IKAnalyzer ikAnalyzer=new IKAnalyzer();
             IndexWriterConfig indexWriterConfig=new IndexWriterConfig(Version.LUCENE_CURRENT,ikAnalyzer);
             indexWriterConfig.setOpenMode(IndexWriterConfig.OpenMode.CREATE_OR_APPEND);
-            indexWriter =new IndexWriter(fsDirectory,indexWriterConfig);
+            IndexWriter  indexWriter =new IndexWriter(fsDirectory,indexWriterConfig);
+            indexWriterMap.put(attribute.getCategory(),indexWriter);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
     public  void  createIndex(ResourceAttribute  attribute){
-
         long  startTime=System.currentTimeMillis();
         log.info("开始创建索引数据.");
         DocumentConvert documentConvert=resourceFactory.get(attribute);
-        openResource(attribute.getIndexPath());
-      /*  *//** 清空索引文件*//*
+        if(indexWriterMap.get(attribute.getCategory())!=null){
+            attribute.setWriter(indexWriterMap.get(attribute.getCategory()));
+        }else {
+            openResource(attribute);
+            attribute.setWriter(indexWriterMap.get(attribute.getCategory()));
+        }
+        /*  *//** 清空索引文件*//*
         FileUtil.deleteFiles(file);*/
-        attribute.setWriter(indexWriter);
         documentConvert.convertHandlerDocument(attribute);
-        closeWriter();
+        closeWriter(attribute);
         long  endTime=System.currentTimeMillis();
         log.info("总共耗时:"+(endTime-startTime));
     }
 
-    public  void  closeWriter(){
+
+    public  void  closeWriter(ResourceAttribute attribute){
+        IndexWriter  indexWriter=indexWriterMap.get(attribute.getCategory());
+        indexWriterMap.remove(attribute.getCategory()); // 清除掉以便重新打开
         if(indexWriter!=null){
             try {
                 indexWriter.close();

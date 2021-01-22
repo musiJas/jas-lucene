@@ -53,7 +53,7 @@ public class FileCreateController {
         luceneReaderService.openResource(properties.getIndexPath()+ File.separator+cacheType);
         QueryCondition   queryCondition=new QueryCondition();
         luceneReaderService.termQuery(field,content,queryCondition);
-        luceneReaderService.closeReader();
+        luceneReaderService.closeReader(cacheType);
         long  endTime=System.currentTimeMillis();
         log.info("总共耗时:"+(endTime-startTime));
         return null;

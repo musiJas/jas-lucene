@@ -30,12 +30,13 @@ public class HotspotCreateIndexJob {
 
 
     //@Scheduled(cron=" 0 15 10 ? * SUN-SAT")
-    @Scheduled(cron = "${jobs.schedule}")
-    //@Scheduled(fixedRate = 30000)
+    //@Scheduled(cron = "${jobs.schedule}")
+    //@Scheduled(fixedRate = 40000)
+    @Scheduled(fixedRate = 30000)
     public  void  startCreateIndex(){
         log.info("开始创建索引数据.{}"+CacheType.hotspot.getKey());
         RedisSource redisSource=new RedisSource();
-        redisSource.setKey(CacheType.hotspot.getKey());
+        redisSource.setCategory(CacheType.hotspot.getKey());
         redisSource.setIndexPath(contextProperties.getIndexPath()+ File.separator+CacheType.hotspot.getKey());
         redisSource.setType(ResourceType.redis);
         luceneWriterService.createIndex(redisSource);

@@ -10,20 +10,21 @@ import org.apache.lucene.search.SortField;
 
 import java.util.*;
 
-public enum ReadingFormatter {
- /*   Field.Index.ANALYZED:分词建索引
+public enum JourneyFormatter {
+    /*   Field.Index.ANALYZED:分词建索引
     Field.Index.ANALYZED_NO_NORMS:分词建索引，但是Field的值不像通常那样被保存，而是只取一个byte，这样节约存储空间(ANALYZED存储了index time,boost information等norms，而ANALYZED_NO_NORMS不存储)
     Field.Index.NOT_ANALYZED:不分词且索引,即不使用 analyzer分析，整体作为一个token，常用语精确匹配，例如文件名，ID号等就用这个
     Field.Index.NOT_ANALYZED_NO_NORMS:不分词建索引，Field的值去一个byte保存*/
 
     title("title", TextField.class, Field.Store.YES,Field.Index.ANALYZED,5.0f),
-    date("date", LongField.class,Field.Store.YES,Field.Index.ANALYZED,1.0f),
-    img("img",TextField.class,Field.Store.YES, Field.Index.NOT_ANALYZED,1.0f),
-    score("score",StringField.class,Field.Store.YES, Field.Index.NOT_ANALYZED,1.0f),
-    info("info",TextField.class,Field.Store.YES, Field.Index.ANALYZED_NO_NORMS,1.0f),
-    author("author",TextField.class,Field.Store.YES, Field.Index.NOT_ANALYZED,1.0f),
-    detail("detail",TextField.class,Field.Store.YES, Field.Index.NOT_ANALYZED,1.0f),
-    type("type",TextField.class,Field.Store.YES, Field.Index.NOT_ANALYZED,1.0f);
+    img("img", StringField.class,Field.Store.YES,Field.Index.NOT_ANALYZED,1.0f),
+    ids("ids",StringField.class,Field.Store.YES, Field.Index.NOT_ANALYZED,1.0f),
+    category("category",StringField.class,Field.Store.YES, Field.Index.NOT_ANALYZED,1.0f),
+    info("info",StringField.class,Field.Store.YES, Field.Index.NOT_ANALYZED,1.0f),
+    focus("focus",IntField.class,Field.Store.YES, Field.Index.NOT_ANALYZED,1.0f),
+    detail("details",StringField.class,Field.Store.YES, Field.Index.NOT_ANALYZED,1.0f),
+    date("date", LongField.class,Field.Store.YES,Field.Index.ANALYZED,1.0f);
+
 
 
 
@@ -32,12 +33,12 @@ public enum ReadingFormatter {
     private  Field.Store  storeValue;
     private  Field.Index  indexValue;
     private  float    boost;
-    ReadingFormatter(){
+    JourneyFormatter(){
 
     }
 
 
-    ReadingFormatter(String field, Class fieldType, Field.Store  storeValue, Field.Index indexValue, Float  boost){
+    JourneyFormatter(String field, Class fieldType, Field.Store  storeValue, Field.Index indexValue, Float  boost){
         this.field=field;
         this.fieldType=fieldType;
         this.storeValue=storeValue;
@@ -47,7 +48,7 @@ public enum ReadingFormatter {
 
     public static  String[]  listFields(){
         List<String> list=new ArrayList<>();
-        for(ReadingFormatter matter:ReadingFormatter.values()){
+        for(JourneyFormatter matter: JourneyFormatter.values()){
             list.add(matter.field);
         }
         return  list.toArray(new String[list.size()]);
@@ -67,9 +68,9 @@ public enum ReadingFormatter {
 
     public static JSONObject resolveDocument(Document  document){
         JSONObject json=new JSONObject();
-        for(ReadingFormatter  formatter:ReadingFormatter.values()){
+        for(JourneyFormatter formatter: JourneyFormatter.values()){
             // 对date做格式转换
-            if(StringUtils.equals(formatter.field,"date")){
+            if(StringUtils.equals(formatter.field,"focus")){
                 Long  times=Long.parseLong(document.get("date"));
                 json.put(formatter.field,DateUtils.format(new Date(times)));
             }else {
@@ -79,20 +80,19 @@ public enum ReadingFormatter {
         return json;
     }
 
+
     /** 获取排序规则 **/
     public  static Sort getDefaultSort(){
-        SortField score=new SortField("score",SortField.Type.INT,true);
+        SortField  rank=new SortField("focus",SortField.Type.INT,true);
         SortField  date =new SortField("date",SortField.Type.LONG,true);
-        Sort  sort=new Sort(date,score);
+        Sort  sort=new Sort(date,rank);
         return sort;
     }
-
-
 
     public static Field initialFormatter(String field, String value){
         /*Field  field1=new TextField("","",null);
         field1.setBoost(5.0f);*/
-        for(ReadingFormatter bf: ReadingFormatter.values()){
+        for(JourneyFormatter bf: JourneyFormatter.values()){
             if(StringUtils.equals(field,bf.field)) {
                 return LuceneFormatter.getField(field, value, bf.toMap(), bf.fieldType);
             }

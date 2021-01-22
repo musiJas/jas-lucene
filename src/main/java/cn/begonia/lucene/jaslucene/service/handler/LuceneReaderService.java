@@ -6,6 +6,7 @@ import cn.begonia.lucene.jaslucene.common.SearchType;
 import cn.begonia.lucene.jaslucene.config.ContextProperties;
 import cn.begonia.lucene.jaslucene.famatter.LuceneFormatter;
 import cn.begonia.lucene.jaslucene.famatter.parser.RangeParser;
+import cn.begonia.lucene.jaslucene.resourece.ResourceAttribute;
 import cn.begonia.lucene.jaslucene.util.DateUtils;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
@@ -33,10 +34,8 @@ import org.wltea.analyzer.lucene.IKAnalyzer;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 读数据查询含各类查询，查找索引服务
@@ -45,12 +44,67 @@ import java.util.Map;
 @Slf4j
 @Service
 public class LuceneReaderService {
-    private FSDirectory  fsDirectory;
+    private  static Map<String,FSDirectory>  fsDirectoryHashMap=new ConcurrentHashMap<>(16);
+    private  static Map<String,DirectoryReader>  directoryReaderMap=new ConcurrentHashMap<>(16);
+    private  static Map<String,IndexSearcher>  indexSearcherMap=new ConcurrentHashMap<>(16);
+
+  /*private FSDirectory  fsDirectory;
     private DirectoryReader directoryReader;
-    private IndexWriter  indexWriter;
     private IndexSearcher indexSearcher;
+    private IndexWriter  indexWriter;*/
     @Autowired
     ContextProperties properties;
+
+    /**整理代码*/
+    public  void  openResource(ResourceAttribute attribute){
+        /**重新获取 **/
+        String  indexPath=attribute.getIndexPath();
+        File  businessFile=new File(indexPath+ File.separator+attribute.getCategory());
+        try {
+            FSDirectory  fsDirectory= FSDirectory.open(businessFile);
+            DirectoryReader directoryReader=DirectoryReader.open(fsDirectory);
+            IndexSearcher indexSearcher=new IndexSearcher(directoryReader);
+            fsDirectoryHashMap.put(attribute.getCategory(),fsDirectory);
+            directoryReaderMap.put(attribute.getCategory(),directoryReader);
+            indexSearcherMap.put(attribute.getCategory(),indexSearcher);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /** 按照分类打开索引**/
+    public  void   openResource(String category) {
+        String  indexPath=properties.getIndexPath();
+        File  businessFile=new File(indexPath+ File.separator+category);
+        try {
+            FSDirectory fsDirectory= FSDirectory.open(businessFile);
+            DirectoryReader directoryReader=DirectoryReader.open(fsDirectory);
+            IndexSearcher indexSearcher=new IndexSearcher(directoryReader);
+            fsDirectoryHashMap.put(category,fsDirectory);
+            directoryReaderMap.put(category,directoryReader);
+            indexSearcherMap.put(category,indexSearcher);
+        } catch (IOException e) {
+            // e.printStackTrace();
+        }
+    }
+
+   /* *//** 按照分类打开索引**//*
+    public  Result   openResourceByDay(String category) {
+        String  indexPath=properties.getIndexPath();
+        File  businessFile=new File(indexPath+ File.separator+category);
+        try {
+            fsDirectory= FSDirectory.open(businessFile);
+            directoryReader=DirectoryReader.open(fsDirectory);
+            indexSearcher=new IndexSearcher(directoryReader);
+        } catch (IOException e) {
+            // e.printStackTrace();
+            return  Result.isFail();
+            //throw  new RuntimeException("12312312");
+        }
+        return  Result.isOk();
+    }*/
+
+
 
 
     /** 新增查询数据 **/
@@ -94,15 +148,14 @@ public class LuceneReaderService {
      */
     @SuppressWarnings("all")
     public  Result  querySearch(Query query,QueryCondition condition){
+        IndexSearcher  indexSearcher=indexSearcherMap.get(condition.getCategory());
+        if(indexSearcher== null){
+            openResource(condition.getCategory());
+            indexSearcher=indexSearcherMap.get(condition.getCategory());
+        }
         List<JSONObject> list=new ArrayList<>();
         try {
-            SortField  rank=new SortField("rank",SortField.Type.INT,false);
-            SortField  like=new SortField("like",SortField.Type.INT,true);
-            SortField  date =new SortField("date",SortField.Type.LONG,true);
-            SortField  focus =new SortField("focus",SortField.Type.INT,true);
-            SortField  browse =new SortField("browse",SortField.Type.INT,true);
-            SortField  comment =new SortField("comment",SortField.Type.INT,true);
-            Sort  sort=new Sort(rank,like,date,focus,browse,comment);
+            Sort  sort= LuceneFormatter.getDefaultSort(condition.getCategory());
             TopFieldCollector collector =  TopFieldCollector.create(sort, 10000, true, true, false, false);
             //TopScoreDocCollector collector = TopScoreDocCollector.create(10000, false);
             TopDocs docs=null;
@@ -115,14 +168,15 @@ public class LuceneReaderService {
             //打印查询到的记录数
             System.out.println("总共查询到" + docs.totalHits + "个文档");
             for (ScoreDoc scoreDoc : docs.scoreDocs) {
-                JSONObject obj=new JSONObject();
+                //JSONObject obj=new JSONObject();
                 //取得对应的文档对象
                 Document document = indexSearcher.doc(scoreDoc.doc);
               /*  List<IndexableField> list= document.getFields();
                 for(IndexableField field:list){
                     //System.out.println(field.name());
                 }*/
-                obj.put("title",document.get("title"));
+                JSONObject obj= LuceneFormatter.getReturnJson(condition.getCategory(),document);
+               /* obj.put("title",document.get("title"));
                 obj.put("url",document.get("url"));
                 obj.put("auth",document.get("auth"));
                 Long  times=Long.parseLong(document.get("date"));
@@ -133,7 +187,7 @@ public class LuceneReaderService {
                 obj.put("content",document.get("content"));
                 obj.put("img",document.get("img"));
                 obj.put("focus",document.get("focus"));
-                obj.put("rank",document.get("rank"));
+                obj.put("rank",document.get("rank"));*/
                 list.add(obj);
             }
         } catch (IOException e) {
@@ -150,6 +204,11 @@ public class LuceneReaderService {
      */
     @SuppressWarnings("all")
     public  Result  querySearchByDay(Query query,QueryCondition condition){
+        IndexSearcher  indexSearcher=indexSearcherMap.get(condition.getCategory());
+        if(indexSearcher== null){
+            openResource(condition.getCategory());
+            indexSearcher=indexSearcherMap.get(condition.getCategory());
+        }
         List<JSONObject> list=new ArrayList<>();
         try {
             SortField  date =new SortField("date",SortField.Type.LONG,true);
@@ -173,13 +232,13 @@ public class LuceneReaderService {
                 for(IndexableField field:list){
                     //System.out.println(field.name());
                 }*/
-                obj= LuceneFormatter.getReturnJson("",document);
+                obj= LuceneFormatter.getReturnJson(condition.getCategory(),document);
                 list.add(obj);
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return Result.isOk(list);
+        return Result.isOk(list,list.size());
     }
 
 
@@ -187,7 +246,7 @@ public class LuceneReaderService {
         RangeParser parser=new RangeParser(Version.LUCENE_35,"date",new StandardAnalyzer(Version.LUCENE_35));
         try {
             LuceneReaderService  luceneReaderService = new  LuceneReaderService();
-            luceneReaderService.openResourceByDay("hotspot");
+            luceneReaderService.openResource("hotspot");
             Query  query=parser.parse("date:[2021-01-12 TO 2021-08-19]");
             QueryCondition  condition=new QueryCondition();
             /*condition.setPage(1);
@@ -206,6 +265,7 @@ public class LuceneReaderService {
      * @param analyzer   选用的分词器
      * @param field  要分词查询的关键字
      * */
+    @SuppressWarnings("all")
     public  void   analyzerQuery(Analyzer analyzer,String field,String  content){
         TokenStream  tokenStream=null;
         try {
@@ -377,7 +437,7 @@ public class LuceneReaderService {
         } catch (ParseException e) {
             e.printStackTrace();
         }
-        closeReader();
+        //closeReader(queryCondition.getCategory());
         return Result.isOk();
     }
 
@@ -399,7 +459,13 @@ public class LuceneReaderService {
     /**
      * 高亮查询
      * **/
-    public  void  highLighter(String field,String content){
+    public  void  highLighter(String field,String content,QueryCondition  condition){
+        IndexSearcher  indexSearcher=indexSearcherMap.get(condition.getCategory());
+        if(indexSearcher== null){
+            openResource(condition.getCategory());
+            indexSearcher=indexSearcherMap.get(condition.getCategory());
+        }
+
         IKAnalyzer  ikAnalyzer=new IKAnalyzer();
         QueryParser  queryParser=new QueryParser(Version.LUCENE_47,field,ikAnalyzer);
         try {
@@ -419,79 +485,6 @@ public class LuceneReaderService {
         }
 
 
-    }
-
-  /** 直接打开索引
-     * @request indexPath
-     * **/
-    /*public  void  openResource(String  indexPath){
-        try {
-            fsDirectory= FSDirectory.open(new File(indexPath));
-            directoryReader=DirectoryReader.open(fsDirectory);
-            indexSearcher=new IndexSearcher(directoryReader);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }*/
-
-    /**
-     * 按照分类打开索引
-     * @param category
-     * **/
-    public  void  openResource(String  indexPath,String category){
-        File  businessFile=new File(indexPath+ File.separator+category);
-        try {
-            fsDirectory= FSDirectory.open(businessFile);
-            directoryReader=DirectoryReader.open(fsDirectory);
-            indexSearcher=new IndexSearcher(directoryReader);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-
-    public  void   openWriteResource(String  category){
-        //String  indexPath=properties.getIndexPath();
-        try {
-            //File  businessFile=new File(indexPath+ File.separator+category);
-            //fsDirectory= FSDirectory.open(businessFile);
-            IKAnalyzer ikAnalyzer=new IKAnalyzer();
-            IndexWriterConfig indexWriterConfig=new IndexWriterConfig(Version.LUCENE_CURRENT,ikAnalyzer);
-            indexWriterConfig.setOpenMode(IndexWriterConfig.OpenMode.CREATE_OR_APPEND);
-            indexWriter =new IndexWriter(fsDirectory,indexWriterConfig);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-
-    /** 按照分类打开索引**/
-    public  void   openResource(String category) {
-        String  indexPath=properties.getIndexPath();
-        File  businessFile=new File(indexPath+ File.separator+category);
-        try {
-            fsDirectory= FSDirectory.open(businessFile);
-            directoryReader=DirectoryReader.open(fsDirectory);
-            indexSearcher=new IndexSearcher(directoryReader);
-        } catch (IOException e) {
-            // e.printStackTrace();
-        }
-    }
-
-    /** 按照分类打开索引**/
-    public  Result   openResourceByDay(String category) {
-        String  indexPath=properties.getIndexPath();
-        File  businessFile=new File(indexPath+ File.separator+category);
-        try {
-            fsDirectory= FSDirectory.open(businessFile);
-            directoryReader=DirectoryReader.open(fsDirectory);
-            indexSearcher=new IndexSearcher(directoryReader);
-        } catch (IOException e) {
-            // e.printStackTrace();
-            return  Result.isFail();
-            //throw  new RuntimeException("12312312");
-        }
-        return  Result.isOk();
     }
 
     /** 多索引窗口查询 **/
@@ -617,12 +610,12 @@ public class LuceneReaderService {
     }
 
 
-    /**  切换索引reader 使用reopen **/
+  /*  *//**  切换索引reader 使用reopen **//*
     public  void  changeResource(String category){
             if(StringUtils.isEmpty(category)){
                 return;
             }
-            /** 改变reader .*/
+            *//** 改变reader .*//*
             if(indexSearcher==null){
                 openResource(category);
                 return ;
@@ -641,13 +634,12 @@ public class LuceneReaderService {
         } catch (CorruptIndexException e) {
         } catch (IOException e) {
         }
+    }*/
 
 
-    }
-
-
-
-    public  void  closeReader(){
+    public  void  closeReader(String  category){
+        DirectoryReader  directoryReader=directoryReaderMap.get(category);
+        directoryReaderMap.remove(category);
         if(directoryReader!=null){
             try {
                 directoryReader.close();

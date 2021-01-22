@@ -13,33 +13,29 @@ import org.springframework.stereotype.Component;
 
 import java.io.File;
 
-/**
- * @author begonia_chen
- * @data 2020/8/17 11:10
- * @description redis生成索引的方法
- **/
 @Slf4j
 @Component
 @PropertySource("classpath:application.properties")
-public class MovieCreateIndexJob {
+public class JourneyCreateIndexJob {
 
     @Autowired
-    ContextProperties   contextProperties;
+    ContextProperties contextProperties;
     @Autowired
-    LuceneWriterService  luceneWriterService;
+    LuceneWriterService luceneWriterService;
 
 
     //@Scheduled(cron=" 0 15 10 ? * SUN-SAT")
     //@Scheduled(cron = "${jobs.schedule}")
-    @Scheduled(fixedRate = 40000)
-    public  void  startCreateIndex(){
-        log.info("开始创建索引数据.{}",CacheType.movie.getKey());
-        RedisSource  redisSource=new RedisSource();
-        redisSource.setCategory(CacheType.movie.getKey());
-        redisSource.setIndexPath(contextProperties.getIndexPath()+ File.separator+CacheType.movie.getKey());
+    @Scheduled(fixedRate = 3000)
+    public void startCreateIndex() {
+        log.info("开始创建索引数据.{}" + CacheType.journey.getKey());
+        RedisSource redisSource = new RedisSource();
+        redisSource.setCategory(CacheType.journey.getKey());
+        redisSource.setIndexPath(contextProperties.getIndexPath() + File.separator + CacheType.journey.getKey());
         redisSource.setType(ResourceType.redis);
         luceneWriterService.createIndex(redisSource);
         log.info("结束创建索引数据.");
     }
+
 
 }

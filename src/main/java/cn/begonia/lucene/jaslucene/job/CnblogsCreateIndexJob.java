@@ -30,11 +30,12 @@ public class CnblogsCreateIndexJob {
 
 
     //@Scheduled(cron=" 0 15 10 ? * SUN-SAT")
-    @Scheduled(cron = "${jobs.schedule}")
+    //@Scheduled(cron = "${jobs.schedule}")
+    @Scheduled(fixedRate = 100000)
     public  void  startCreateIndex(){
         log.info("开始创建索引数据.{}"+CacheType.cnblogs.getKey());
         RedisSource  redisSource=new RedisSource();
-        redisSource.setKey(CacheType.cnblogs.getKey());
+        redisSource.setCategory(CacheType.cnblogs.getKey());
         redisSource.setIndexPath(contextProperties.getIndexPath()+ File.separator+CacheType.cnblogs.getKey());
         redisSource.setType(ResourceType.redis);
         luceneWriterService.createIndex(redisSource);

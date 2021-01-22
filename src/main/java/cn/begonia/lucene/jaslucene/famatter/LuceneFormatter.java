@@ -1,20 +1,21 @@
 package cn.begonia.lucene.jaslucene.famatter;
 
 import cn.begonia.lucene.jaslucene.common.CacheType;
-import cn.begonia.lucene.jaslucene.famatter.formatter.CnblogsFormatter;
-import cn.begonia.lucene.jaslucene.famatter.formatter.HotspotFormatter;
-import cn.begonia.lucene.jaslucene.famatter.formatter.MovieFormatter;
-import cn.begonia.lucene.jaslucene.famatter.formatter.ReadingFormatter;
+import cn.begonia.lucene.jaslucene.famatter.formatter.*;
 import cn.begonia.lucene.jaslucene.util.DateUtils;
 import com.alibaba.fastjson.JSONObject;
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.document.*;
 import org.apache.lucene.document.Field.Store;
+import org.apache.lucene.search.Sort;
+import org.apache.lucene.search.SortField;
+
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author begonia_chen
@@ -92,45 +93,86 @@ public enum LuceneFormatter  {
             return    MovieFormatter.resolveDocument(document);
         }else if(StringUtils.equals(CacheType.reading.getKey(),category)){
             return    ReadingFormatter.resolveDocument(document);
+        }else if(StringUtils.equals(CacheType.life.getKey(),category)){
+            return    LifeFormatter.resolveDocument(document);
+        }else if(StringUtils.equals(CacheType.journey.getKey(),category)){
+            return    JourneyFormatter.resolveDocument(document);
+        }
+        return null;
+    }
+
+    public static Sort   getDefaultSort(String  category){
+        if(StringUtils.equals(CacheType.cnblogs.getKey(),category)){
+            return CnblogsFormatter.getDefaultSort();
+        }else if(StringUtils.equals(CacheType.hotspot.getKey(),category)) {
+            return    HotspotFormatter.getDefaultSort();
+        }else if(StringUtils.equals(CacheType.movie.getKey(),category)){
+            return    MovieFormatter.getDefaultSort();
+        }else if(StringUtils.equals(CacheType.reading.getKey(),category)){
+            return    ReadingFormatter.getDefaultSort();
+        }else if(StringUtils.equals(CacheType.life.getKey(),category)){
+            return    LifeFormatter.getDefaultSort();
+        }else if(StringUtils.equals(CacheType.journey.getKey(),category)){
+            return    JourneyFormatter.getDefaultSort();
         }
         return null;
     }
 
 
-    public static  Field   initialFormatter(String field,String value){
+
+    public static  Field   initialFormatter(String field,String value,String category){
         /*Field  field1=new TextField("","",null);
         field1.setBoost(5.0f);*/
-        for(LuceneFormatter bf: LuceneFormatter.values()){
-            if(StringUtils.equals(field,bf.field)){
-                try {
-                    Constructor<Field> constructor=null;
-                    Field fs=null;
-                    if(StringUtils.equals(bf.fieldType.getName(),IntField.class.getName())){
-                        constructor=bf.fieldType.getConstructor(String.class,int.class, Store.class);
-                        fs= constructor.newInstance(field,Integer.parseInt(value),bf.storeValue);
-                    }else if(StringUtils.equals(bf.fieldType.getName(),LongField.class.getName())){
-                        constructor=bf.fieldType.getConstructor(String.class,long.class, Store.class);
-                        fs= constructor.newInstance(field, DateUtils.parse(value,"yyyy-MM-dd HH:mm").getTime(),bf.storeValue);
-                    }else {
-                        constructor=bf.fieldType.getConstructor(String.class,String.class, Store.class);
-                        fs= constructor.newInstance(field,value,bf.storeValue);
-                        fs.setBoost(bf.boost);// 更新权重,默认是1.0f
-                    }
-                    return  fs;
+        if(StringUtils.equals(CacheType.cnblogs.getKey(),category)){
+            return    CnblogsFormatter.initialFormatter(field,value);
+        }else if(StringUtils.equals(CacheType.hotspot.getKey(),category)) {
+            return    HotspotFormatter.initialFormatter(field,value);
+        }else if(StringUtils.equals(CacheType.movie.getKey(),category)){
+            return    MovieFormatter.initialFormatter(field,value);
+        }else if(StringUtils.equals(CacheType.reading.getKey(),category)){
+            return    ReadingFormatter.initialFormatter(field,value);
+        }else if(StringUtils.equals(CacheType.life.getKey(),category)){
+            return    LifeFormatter.initialFormatter(field,value);
+        }else if(StringUtils.equals(CacheType.journey.getKey(),category)){
+            return    JourneyFormatter.initialFormatter(field,value);
+        }
+        return null;
+    }
 
-                } catch (NoSuchMethodException e) {
-                    e.printStackTrace();
-                } catch (InstantiationException e) {
-                    e.printStackTrace();
-                } catch (IllegalAccessException e) {
-                    e.printStackTrace();
-                } catch (InvocationTargetException e) {
-                    e.printStackTrace();
-                }catch (ParseException e) {
-                    e.printStackTrace();
-                }
-
+    public  static   Field   getField(String field,String value, Map<String,Object> map,Class cls){
+        String bfField=String.valueOf(map.get("field"));
+        Field.Store  storeValue= (Field.Store) map.get("storeValue");
+        Field.Index  indexValue= (Field.Index) map.get("indexValue");
+        Float  boost= (Float) map.get("boost");
+        try {
+            Constructor<Field> constructor=null;
+            Field fs=null;
+            if(StringUtils.equals(cls.getName(),IntField.class.getName())){
+                constructor=cls.getConstructor(String.class,int.class, Field.Store.class);
+                fs= constructor.newInstance(field,Integer.parseInt(value),storeValue);
+            }else if(StringUtils.equals(cls.getName(),LongField.class.getName())){
+                constructor=cls.getConstructor(String.class,long.class, Field.Store.class);
+                fs= constructor.newInstance(field, DateUtils.parse(value,"yyyy-MM-dd HH:mm").getTime(),storeValue);
+            }else if(StringUtils.equals(cls.getName(),StringField.class.getName())){
+                constructor=cls.getConstructor(String.class,String.class, Field.Store.class);
+                fs= constructor.newInstance(field,value,storeValue);
+                fs.setBoost(boost);// 更新权重,默认是1.0f
+            }else if(StringUtils.equals(cls.getName(),TextField.class.getName())){
+                constructor=cls.getConstructor(String.class,String.class, Field.Store.class);
+                fs= constructor.newInstance(field,value,storeValue);
+                fs.setBoost(boost);// 更新权重,默认是1.0f
             }
+            return  fs;
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        }catch (ParseException e) {
+            e.printStackTrace();
         }
         return null;
     }
