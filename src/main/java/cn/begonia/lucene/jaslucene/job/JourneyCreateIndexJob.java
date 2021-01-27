@@ -25,7 +25,7 @@ public class JourneyCreateIndexJob {
 
 
     //@Scheduled(cron=" 0 15 10 ? * SUN-SAT")
-    //@Scheduled(cron = "${jobs.schedule}")
+    @Scheduled(cron = "${jobs.schedule}")
     //@Scheduled(fixedRate = 3000)
     public void startCreateIndex() {
         log.info("开始创建索引数据.{}" + CacheType.journey.getKey());

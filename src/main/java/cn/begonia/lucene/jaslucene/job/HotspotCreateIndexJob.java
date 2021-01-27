@@ -30,7 +30,7 @@ public class HotspotCreateIndexJob {
 
 
     //@Scheduled(cron=" 0 15 10 ? * SUN-SAT")
-    //@Scheduled(cron = "${jobs.schedule}")
+    @Scheduled(cron = "${jobs.schedule}")
     //@Scheduled(fixedRate = 40000)
     //@Scheduled(fixedRate = 3000)
     public  void  startCreateIndex(){

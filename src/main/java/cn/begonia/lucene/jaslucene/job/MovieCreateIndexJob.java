@@ -30,8 +30,8 @@ public class MovieCreateIndexJob {
 
 
     //@Scheduled(cron=" 0 15 10 ? * SUN-SAT")
-    //@Scheduled(cron = "${jobs.schedule}")
-    @Scheduled(fixedRate = 4000)
+    @Scheduled(cron = "${jobs.schedule}")
+    //@Scheduled(fixedRate = 4000)
     public  void  startCreateIndex(){
         log.info("开始创建索引数据.{}",CacheType.movie.getKey());
         RedisSource  redisSource=new RedisSource();
