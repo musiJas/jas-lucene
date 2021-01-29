@@ -2,6 +2,7 @@ package cn.begonia.lucene.jaslucene.job;
 
 import cn.begonia.lucene.jaslucene.common.CacheType;
 import cn.begonia.lucene.jaslucene.common.ResourceType;
+import cn.begonia.lucene.jaslucene.common.Result;
 import cn.begonia.lucene.jaslucene.config.ContextProperties;
 import cn.begonia.lucene.jaslucene.resourece.RedisSource;
 import cn.begonia.lucene.jaslucene.service.handler.LuceneWriterService;
@@ -10,11 +11,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.io.File;
 
 @Slf4j
-@Component
+//@Component
+@RestController
 @PropertySource("classpath:application.properties")
 public class JourneyCreateIndexJob {
 
@@ -28,6 +32,17 @@ public class JourneyCreateIndexJob {
     @Scheduled(cron = "${jobs.schedule}")
     //@Scheduled(fixedRate = 3000)
     public void startCreateIndex() {
+        executeJob();
+    }
+
+    @RequestMapping("/journey")
+    public Result showConsole(){
+        executeJob();
+        return  Result.isOk();
+    }
+
+
+    public  void  executeJob(){
         log.info("开始创建索引数据.{}" + CacheType.journey.getKey());
         RedisSource redisSource = new RedisSource();
         redisSource.setCategory(CacheType.journey.getKey());
@@ -36,6 +51,5 @@ public class JourneyCreateIndexJob {
         luceneWriterService.createIndex(redisSource);
         log.info("结束创建索引数据.");
     }
-
 
 }

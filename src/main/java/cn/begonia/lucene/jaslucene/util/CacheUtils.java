@@ -2,11 +2,15 @@ package cn.begonia.lucene.jaslucene.util;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.parser.Feature;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.connection.RedisZSetCommands;
 import org.springframework.data.redis.core.*;
+import org.springframework.data.redis.serializer.RedisSerializer;
+import redis.clients.jedis.ScanParams;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -18,6 +22,7 @@ import java.util.concurrent.TimeUnit;
  * @data 2020/8/17 10:43
  * @description redis缓存工具类
  **/
+@Slf4j
 public class CacheUtils {
 
     @Resource
@@ -29,6 +34,7 @@ public class CacheUtils {
     public void init() {
         cacheUtils = this;
         cacheUtils.redisTemplate = this.redisTemplate;
+
     }
 
     /**
@@ -192,8 +198,47 @@ public class CacheUtils {
      * @return
      */
     public static Map<Object, Object> hgetAll(String key) {
+
         return cacheUtils.redisTemplate.opsForHash().entries(key);
     }
+
+    /**
+     * 根据key获取所以值
+     *
+     * @param key
+     * @return
+     */
+    public static Cursor<Map.Entry<Object, Object>> scan(String key) {
+
+      /*  long start = System.currentTimeMillis();
+        //需要匹配的key
+        String patternKey =key;
+        ScanOptions options = ScanOptions.scanOptions()
+                //这里指定每次扫描key的数量(很多博客瞎说要指定Integer.MAX_VALUE，这样的话跟        keys有什么区别？)
+                .count(10000)
+                .match(patternKey).build();
+        RedisSerializer<Map.Entry<String,Object>> redisSerializer = (RedisSerializer<Map.Entry<String,Object>>) cacheUtils.redisTemplate.getKeySerializer();
+        Cursor<Map.Entry<String,Object>> cursor = (Cursor) cacheUtils.redisTemplate.executeWithStickyConnection(redisConnection -> new ConvertingCursor<Map.Entry<String,Object>>(redisConnection.hScan("*".getBytes(),options), redisSerializer::deserialize));
+        List<String> result = new ArrayList<>();
+        while(cursor.hasNext()){
+            System.out.println(cursor.next().toString());
+            String s1= cursor.next().getKey();
+            Object s2=cursor.next().getValue();
+            result.add(cursor.next().toString());
+        }
+        //切记这里一定要关闭，否则会耗尽连接数。报Cannot get Jedis connection; nested exception is redis.clients.jedis.exceptions.JedisException: Could not get a
+        try {
+            cursor.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }*/
+        //log.info("scan扫描共耗时：{} ms key数量：{}",System.currentTimeMillis()-start,result.size());
+
+
+
+        return cacheUtils.redisTemplate.opsForHash().scan("*",ScanOptions.scanOptions().count(Long.MAX_VALUE).match(key).build());
+    }
+
 
     /**
      * 保存到hash集合中
