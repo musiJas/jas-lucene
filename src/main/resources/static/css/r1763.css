@@ -348,29 +348,29 @@
 }
 
 .badge--prime {
-    background-image: url("/assets/icons/thirdparty/prime.v101.png");
+    background-image: url("/static/assets/icons/thirdparty/prime.v101.png");
     background-size: 44px 12px;
     width: 44px;
     height: 12px
 }
 
 .svg .badge--prime {
-    background-image: url("/assets/icons/thirdparty/prime.v101.svg")
+    background-image: url("/static/assets/icons/thirdparty/prime.v101.svg")
 }
 
 .badge--yandex {
-    background-image: url("/assets/attribution/yandex.v102.png");
+    background-image: url("/static/assets/attribution/yandex.v102.png");
     background-size: 44px 19px;
     width: 44px;
     height: 19px
 }
 
 .svg .badge--yandex {
-    background-image: url("/assets/attribution/yandex.v102.svg")
+    background-image: url("/static/assets/attribution/yandex.v102.svg")
 }
 
 .badge--yahoo {
-    background-image: url("/assets/attribution/yahoo.v103.png");
+    background-image: url("/static/assets/attribution/yahoo.v103.png");
     background-size: 55px 13px;
     width: 55px;
     height: 13px
@@ -378,30 +378,30 @@
 
 @media only screen and (-webkit-min-device-pixel-ratio: 2), only screen and (-moz-min-device-pixel-ratio: 2), only screen and (min--moz-device-pixel-ratio: 2), only screen and (-ms-min-device-pixel-ratio: 2), only screen and (min-device-pixel-ratio: 2), only screen and (min-resolution: 192dppx) {
     .badge--yahoo {
-        background-image:url("/assets/attribution/yahoo.v103.svg")
+        background-image:url("/static/assets/attribution/yahoo.v103.svg")
     }
 }
 
 .badge--blekko {
-    background-image: url("/assets/attribution/blekko.v102.png");
+    background-image: url("/static/assets/attribution/blekko.v102.png");
     background-size: 48px 14px;
     width: 48px;
     height: 14px
 }
 
 .svg .badge--blekko {
-    background-image: url("/assets/attribution/blekko.v102.svg")
+    background-image: url("/static/assets/attribution/blekko.v102.svg")
 }
 
 .badge--bing {
-    background-image: url("/assets/attribution/bing.v102.png");
+    background-image: url("/static/assets/attribution/bing.v102.png");
     background-size: 54px 22px;
     width: 54px;
     height: 22px
 }
 
 .svg .badge--bing {
-    background-image: url("/assets/attribution/bing.v102.svg")
+    background-image: url("/static/assets/attribution/bing.v102.svg")
 }
 
 .play-btn {
@@ -1116,7 +1116,7 @@
 
 .flag-xs {
     display: inline-block;
-    background: url("/assets/flags/flags-16px.png?v=3") no-repeat;
+    background: url("/static/assets/flags/flags-16px.png?v=3") no-repeat;
     width: 16px;
     height: 16px;
     background-size: 16px 928px
@@ -1356,7 +1356,7 @@
 
 .flag-sm {
     display: inline-block;
-    background: url("/assets/flags/flags-20px.png?v=3") no-repeat;
+    background: url("/static/assets/flags/flags-20px.png?v=3") no-repeat;
     width: 20px;
     height: 20px;
     background-size: 20px 1160px
@@ -1596,7 +1596,7 @@
 
 .flag-lg {
     display: inline-block;
-    background: url("/assets/flags/flags-32px.png?v=3") no-repeat;
+    background: url("/static/assets/flags/flags-32px.png?v=3") no-repeat;
     width: 32px;
     height: 32px;
     background-size: 32px 1824px
@@ -1832,29 +1832,29 @@
 
 @media only screen and (-webkit-min-device-pixel-ratio: 2), only screen and (-moz-min-device-pixel-ratio: 2), only screen and (min--moz-device-pixel-ratio: 2), only screen and (-ms-min-device-pixel-ratio: 2), only screen and (min-device-pixel-ratio: 2), only screen and (min-resolution: 192dppx) {
     .flag-xs {
-        background-image:url("/assets/flags/flags-32px.png?v=3a")
+        background-image:url("/static/assets/flags/flags-32px.png?v=3a")
     }
 
     .flag-sm {
-        background-image: url("/assets/flags/flags-40px.png?v=3")
+        background-image: url("/static/assets/flags/flags-40px.png?v=3")
     }
 
     .flag-lg {
-        background-image: url("/assets/flags/flags-64px.png?v=3")
+        background-image: url("/static/assets/flags/flags-64px.png?v=3")
     }
 }
 
 @media only screen and (-webkit-min-device-pixel-ratio: 3), only screen and (-moz-min-device-pixel-ratio: 3), only screen and (min--moz-device-pixel-ratio: 3), only screen and (-ms-min-device-pixel-ratio: 3), only screen and (min-device-pixel-ratio: 3), only screen and (min-resolution: 288dppx) {
     .flag-xs {
-        background-image:url("/assets/flags/flags-48px.png?v=3")
+        background-image:url("/static/assets/flags/flags-48px.png?v=3")
     }
 
     .flag-sm {
-        background-image: url("/assets/flags/flags-60px.png?v=3")
+        background-image: url("/static/assets/flags/flags-60px.png?v=3")
     }
 
     .flag-lg {
-        background-image: url("/assets/flags/flags-96px.png?v=3")
+        background-image: url("/static/assets/flags/flags-96px.png?v=3")
     }
 }
 
@@ -3050,7 +3050,7 @@
 }
 
 .tile__icon--pin {
-    background-image: url("/assets/map-pin.png");
+    background-image: url("/static/assets/map-pin.png");
     background-size: 25px 35px;
     line-height: 27px;
     height: 35px;
@@ -3062,7 +3062,7 @@
 }
 
 .svg .tile__icon--pin {
-    background-image: url("/assets/map-pin.svg")
+    background-image: url("/static/assets/map-pin.svg")
 }
 
 .tile__more-wrap {
@@ -4095,7 +4095,7 @@
 }
 
 .detail__media__img-bg {
-    background: url("/assets/transparency-bg.jpg") repeat;
+    background: url("/static/assets/transparency-bg.jpg") repeat;
     background-size: 30px;
     z-index: 1
 }
@@ -5228,7 +5228,7 @@
     height: 100%;
     top: 0;
     left: 0;
-    background: url("/assets/map-grid.svg") repeat;
+    background: url("/static/assets/map-grid.svg") repeat;
     opacity: 0.1;
     background-size: 50px 50px
 }
@@ -5312,7 +5312,7 @@
     height: 100%;
     top: 0;
     left: 0;
-    background: url("/assets/map-grid.svg") repeat;
+    background: url("/static/assets/map-grid.svg") repeat;
     opacity: 0.1;
     background-size: 50px 50px
 }
@@ -13136,7 +13136,7 @@
 }
 
 .vertical--map__sidebar__header__logo__img {
-    background-image: url(assets/logo_header.v107.min.png);
+    background-image: url(static/assets/logo_header.v107.min.png);
     background-position: 50% 50%;
     background-repeat: no-repeat;
     background-size: contain;
@@ -13152,15 +13152,15 @@
 }
 
 .svg .vertical--map__sidebar__header__logo__img {
-    background-image: url(assets/logo_header.v107.min.svg)
+    background-image: url(static/assets/logo_header.v107.min.svg)
 }
 
 .dark-header .vertical--map__sidebar__header__logo__img {
-    background-image: url(assets/logo_header_alt.v103.min.png)
+    background-image: url(static/assets/logo_header_alt.v103.min.png)
 }
 
 .svg.dark-header .vertical--map__sidebar__header__logo__img {
-    background-image: url(assets/logo_header_alt.v103.min.svg)
+    background-image: url(static/assets/logo_header_alt.v103.min.svg)
 }
 
 .vertical--map__sidebar__wrapper {

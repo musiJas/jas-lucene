@@ -11,7 +11,7 @@ import java.util.*;
  **/
 public enum SearchType {
     hotspot("hotspot","热点数据"),
-    blog("cnblogs","博客类型"),
+    cnblog("cnblogs","博客类型"),
     life("life","生活类-包含常识等"),
     reading("reading","阅读指导"),
     movie("movie","高分movie指导"),

@@ -4,8 +4,6 @@ import cn.begonia.lucene.jaslucene.famatter.formatter.CnblogsFormatter;
 import cn.begonia.lucene.jaslucene.famatter.formatter.HotspotFormatter;
 import cn.begonia.lucene.jaslucene.famatter.formatter.MovieFormatter;
 import cn.begonia.lucene.jaslucene.famatter.formatter.ReadingFormatter;
-import org.apache.commons.lang.StringUtils;
-import sun.misc.Cache;
 
 /**
  * @author begonia_chen

@@ -12,7 +12,7 @@ import java.util.Map;
  **/
 @Data
 public class QueryCondition implements Serializable {
-    private  static final  Integer PAGESIZE=20;
+    public  static final  Integer PAGESIZE=30;
     private  Integer  page;
     private  Integer  pageSize;
     private  Map<String,Object> map;

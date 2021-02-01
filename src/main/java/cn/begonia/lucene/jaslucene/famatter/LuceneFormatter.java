@@ -13,9 +13,7 @@ import org.apache.lucene.search.SortField;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author begonia_chen
@@ -78,9 +76,13 @@ public enum LuceneFormatter  {
 
     public static  String[]  listFields(){
         List<String> list=new ArrayList<>();
-        for(LuceneFormatter matter:LuceneFormatter.values()){
+      /*  for(LuceneFormatter matter:LuceneFormatter.values()){
             list.add(matter.field);
+        }*/
+        for(CacheType type:CacheType.values()){
+            list.addAll(getCategoryAllField(type.getKey()));
         }
+        list = new ArrayList<>(new HashSet<>(list));
         return  list.toArray(new String[list.size()]);
     }
 
@@ -101,6 +103,31 @@ public enum LuceneFormatter  {
         return null;
     }
 
+    public  static  List<String>  getCategoryAllField(String  category){
+        List<String> list=new ArrayList<>();
+        if(StringUtils.equals(CacheType.cnblogs.getKey(),category)){
+            String[] arr=CnblogsFormatter.listFields();
+            list= Arrays.asList(arr);
+        }else if(StringUtils.equals(CacheType.hotspot.getKey(),category)) {
+            String[] arr=HotspotFormatter.listFields();
+            list=Arrays.asList(arr);
+        }else if(StringUtils.equals(CacheType.movie.getKey(),category)){
+            String[] arr=MovieFormatter.listFields();
+            list=Arrays.asList(arr);
+        }else if(StringUtils.equals(CacheType.reading.getKey(),category)){
+            String[] arr=ReadingFormatter.listFields();
+            list=Arrays.asList(arr);
+        }else if(StringUtils.equals(CacheType.life.getKey(),category)){
+            String[] arr=LifeFormatter.listFields();
+            list=Arrays.asList(arr);
+        }else if(StringUtils.equals(CacheType.journey.getKey(),category)){
+            String[] arr=LifeFormatter.listFields();
+            list=Arrays.asList(arr);
+        }
+        return list;
+    }
+
+
     public static Sort   getDefaultSort(String  category){
         if(StringUtils.equals(CacheType.cnblogs.getKey(),category)){
             return CnblogsFormatter.getDefaultSort();
@@ -114,8 +141,12 @@ public enum LuceneFormatter  {
             return    LifeFormatter.getDefaultSort();
         }else if(StringUtils.equals(CacheType.journey.getKey(),category)){
             return    JourneyFormatter.getDefaultSort();
+        }else {
+            /**默认的排序规则**/
+            SortField  date =new SortField("date",SortField.Type.LONG,true);
+            Sort  sort=new Sort(date);
+            return  sort;
         }
-        return null;
     }
 
 
@@ -176,5 +207,75 @@ public enum LuceneFormatter  {
         }
         return null;
     }
+
+
+     public static  JSONObject  convertObject(String key, Document document){
+        JSONObject obj = new JSONObject();
+         /**对非正常格式做一下数据处理**/
+         if(StringUtils.equals(key,CnblogsFormatter.content.name())){
+             String  content=document.get(key);
+             if(StringUtils.isEmpty(content)){
+                 return null;
+             }
+             if(content.startsWith(">")||content.startsWith("<")||content.endsWith("</p>")){
+                 content=content.substring(1,content.length()).replaceAll("</p>","");
+                 // content=content.replace(">","").replace("<","").replaceAll("</p>","");
+             }
+             if(content.indexOf("avatar")!=-1){
+                 //content= content.replace("\\n","");
+                 String avatar=content.substring(0,content.indexOf("/>")-1);
+                 avatar=avatar.substring(avatar.indexOf("src")+5);
+                 content=content.substring(content.indexOf("/>")+2);
+                 content=content.replaceAll("\\n","").trim();
+                 obj.put("avatar",avatar);
+                 obj.put("content",content);
+             }else {
+                 content=content.replaceAll("\\n","").trim();
+                 obj.put("content",content);
+             }
+         }else if(StringUtils.equals(key,CnblogsFormatter.date.name())){
+             long   longDate=Long.parseLong(document.get(key));
+             obj.put(key,DateUtils.format(new Date(longDate)));
+         }else {
+             obj.put(key,document.get(key));
+         }
+         return  obj;
+     }
+
+    public  static  JSONObject  judgeShowDescription(JSONObject  obj){
+        String avatar=obj.getString("avatar");
+        String img=obj.getString("img");
+        String content=obj.getString("content");
+        String detail=obj.getString("detail");
+        if(StringUtils.isEmpty(avatar)||avatar.length()==0){
+             if(StringUtils.isEmpty(img)){
+                 if(StringUtils.isNotBlank(detail)||StringUtils.isNotBlank(content)){
+                     obj.put("show",true);
+                     obj.put("display",false);
+                 }else {
+                     obj.put("show",false);
+                 }
+                 return obj;
+             }
+        }
+        obj.put("show",true);
+        obj.put("display",true);
+        return  obj;
+    }
+
+
+    public  static  JSONObject   convert(String field,Document  document){
+        JSONObject json=new JSONObject();
+        if(StringUtils.equals(field,"date")){
+            Long  times=Long.parseLong(document.get("date"));
+            json.put(field,DateUtils.format(new Date(times)));
+        }else {
+            JSONObject object = LuceneFormatter.convertObject(field,document);
+            json.putAll(object);
+            //json.put(formatter.field,document.get(formatter.field));
+        }
+        return json;
+    }
+
 
 }

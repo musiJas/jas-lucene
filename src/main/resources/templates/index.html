@@ -12,10 +12,12 @@
     <meta http-equiv="content-type" content="text/html; charset=UTF-8;charset=utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=1"/>
     <meta name="HandheldFriendly" content="true"/>
+    <link rel="shortcut icon" th:href="@{/pic/favicon.ico}"/>
+    <link rel="bookmark" th:href="@{/pic/favicon.ico}"/>
     <link rel="stylesheet"  th:href="@{/static/css/s1764.css}"   type="text/css"/>
     <link rel="stylesheet" th:href="@{/static/css/o1764.css}" type="text/css"/>
     <link th:href="@{/static/css/lato-open-sans.css}" rel="stylesheet"/>
-    <link rel="shortcut icon" th:href="@{/assets/doge_ico.png}" type="image/png"/>
+    <link rel="shortcut icon" th:href="@{/static/assets/doge_ico.png}" type="image/png"/>
     <meta property="og:url" content="https://DogeDoge.com/"/>
     <meta property="og:site_name" content="DogeDoge"/>
     <title>Begonia 检索</title>
@@ -82,7 +84,7 @@
                     </a>
                 </div>
                 <div class="search-wrap--home">
-                    <form id="search_form_homepage" class="search--home js-search-form search--adv search--focus" name="x" method="GET" action="/search" _lpchecked="1">
+                    <form id="search_form_homepage" class="search--home js-search-form search--adv search--focus" name="x" method="GET" th:action="@{/search}"  _lpchecked="1">
                         <input id="search_form_input_homepage" class="js-search-input search__input--adv" type="text" autocomplete="off" name="keyword" tabindex="1" value="" autocapitalize="off" autocorrect="off"/>
                         <input id="search_button_homepage" class="search__button js-search-button" type="submit" tabindex="2" value="S"/>
                         <input id="search_form_input_clear" class="search__clear js-search-clear" type="button" tabindex="3" value="X"/>
@@ -296,11 +298,11 @@
     _paq.push(['trackPageView']);
     _paq.push(['enableLinkTracking']);
     (function() {
-        var u="/data/";
+       /* var u="/data/";
         _paq.push(['setTrackerUrl', u+'up']);
         _paq.push(['setSiteId', '1']);
         var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0];
-        g.type='text/javascript'; g.async=true; g.defer=true; g.src=u+'js'; s.parentNode.insertBefore(g,s);
+        g.type='text/javascript'; g.async=true; g.defer=true; g.src=u+'js'; s.parentNode.insertBefore(g,s);*/
     })();
 </script>
 </body>

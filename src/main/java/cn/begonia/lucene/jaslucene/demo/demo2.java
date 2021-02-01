@@ -28,7 +28,7 @@ public class demo2 {
 
     public static void main(String[] args) throws FileNotFoundException, ParseException, java.text.ParseException {
         String  resource="D:\\data\\text";
-        String  index="D:\\data\\index";
+        String  index="D:\\data\\index\\reading";
         String  key="date";
         String  value="date:[2021-01-01 TO 2021-01-19]";
         //String  value="like:[10 TO 100]";
@@ -40,8 +40,8 @@ public class demo2 {
         String [] multi={"title","content","auth","focus"};
         //multiFieldQueryParser(multi,content);
         //queryStringResult(contentTitle,content);
-        //queryIndex(index,key);
-         queryNumericResult(key,value);
+        queryIndex(index,"拳头");
+        // queryNumericResult(key,value);
         /*try {
             createIndex(index,resource);
         } catch (IOException e) {
@@ -157,6 +157,10 @@ public class demo2 {
                 Document document=indexSearcher.doc(index);
                 String titles=document.get("title");
                 System.out.println("title="+titles);
+                String detail=document.get("detail");
+                System.out.println("detail="+detail);
+
+
                 String urls=document.get("url");
                 System.out.println("url="+urls);
                 String auths=document.get("auth");

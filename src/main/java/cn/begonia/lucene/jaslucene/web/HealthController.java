@@ -40,10 +40,13 @@ public class HealthController {
     }
 
 
+
+
     public static void main(String[] args) {
         String ss=SearchType.listObject().toString();
         JSONObject obj=JSONObject.parseObject(ss,Feature.OrderedField);
         System.out.println(obj);
-
     }
+
+
 }

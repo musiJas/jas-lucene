@@ -78,10 +78,19 @@ public class DateUtils {
         return  getDurationTime(new Date());
     }
 
+    public static   float   getTime(long startTime,long endTime){
+        long ss= endTime-startTime;
+        float second= (ss/1000f);
+        return second;
+    }
+
+
 
     public static void main(String[] args) throws ParseException {
 
-        System.out.println(getDefaultDate());
+        System.out.println(510/1000f);
+
+        //System.out.println(getDefaultDate());
 
        // System.out.println(new DateUtils().format(new Date()));
         //System.out.println(DateUtils.parse("2020-08-18"));

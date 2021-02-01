@@ -1,10 +1,12 @@
 package cn.begonia.lucene.jaslucene.service.handler;
 
+import cn.begonia.lucene.jaslucene.common.CacheType;
 import cn.begonia.lucene.jaslucene.common.QueryCondition;
 import cn.begonia.lucene.jaslucene.common.Result;
 import cn.begonia.lucene.jaslucene.common.SearchType;
 import cn.begonia.lucene.jaslucene.config.ContextProperties;
 import cn.begonia.lucene.jaslucene.famatter.LuceneFormatter;
+import cn.begonia.lucene.jaslucene.famatter.formatter.*;
 import cn.begonia.lucene.jaslucene.famatter.parser.RangeParser;
 import cn.begonia.lucene.jaslucene.resourece.ResourceAttribute;
 import cn.begonia.lucene.jaslucene.util.DateUtils;
@@ -188,7 +190,8 @@ public class LuceneReaderService {
                 obj.put("img",document.get("img"));
                 obj.put("focus",document.get("focus"));
                 obj.put("rank",document.get("rank"));*/
-                list.add(obj);
+                list.add(LuceneFormatter.judgeShowDescription(obj));
+                //list.add(obj);
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -233,7 +236,7 @@ public class LuceneReaderService {
                     //System.out.println(field.name());
                 }*/
                 obj= LuceneFormatter.getReturnJson(condition.getCategory(),document);
-                list.add(obj);
+                list.add(LuceneFormatter.judgeShowDescription(obj));
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -505,19 +508,13 @@ public class LuceneReaderService {
         RangeParser parser=new RangeParser(Version.LUCENE_35,"data",new StandardAnalyzer(Version.LUCENE_35));
         Query  query=parser.parse(value);
 
-        SortField  rank=new SortField("rank",SortField.Type.INT,false);
-        SortField  like=new SortField("like",SortField.Type.INT,true);
-        SortField  date =new SortField("date",SortField.Type.LONG,true);
-        SortField  focus =new SortField("focus",SortField.Type.INT,true);
-        SortField  browse =new SortField("browse",SortField.Type.INT,true);
-        SortField  comment =new SortField("comment",SortField.Type.INT,true);
-        Sort  sort=new Sort(rank,like,date,focus,browse,comment);
+        Sort  sort=LuceneFormatter.getDefaultSort(queryParser.getCategory());
 
         TopFieldCollector collector =  TopFieldCollector.create(sort, 10000, true, true, false, false);
         //TopScoreDocCollector collector = TopScoreDocCollector.create(10000, false);
         TopDocs docs=null;
         if(queryParser.getPage()==null||queryParser.getPage()==0){
-             docs= indexSearcher.search(query,10000,sort);
+             docs= indexSearcher.search(query,QueryCondition.PAGESIZE,sort);
         }else {
             indexSearcher.search(query,collector);
             docs =collector.topDocs(queryParser.getPage(),queryParser.getPageSize());
@@ -526,21 +523,36 @@ public class LuceneReaderService {
         List<JSONObject> resList=new ArrayList<>();
         JSONObject obj=null;
          //topDocs(1);
-
         for(ScoreDoc doc:docs.scoreDocs){
             obj=new JSONObject();
             int  index=doc.doc;
             Document document=indexSearcher.doc(index);
-            for(String key:LuceneFormatter.listFields()){
-                /**转换一下date*/
-                if(StringUtils.equals(key,"date")){
-                    long   longDate=Long.parseLong(document.get(key));
-                    obj.put(key,DateUtils.format(new Date(longDate)));
-                }else {
-                    obj.put(key,document.get(key));
+            String category=document.get("category");
+            if(StringUtils.isEmpty(category)){
+                for(String key:LuceneFormatter.listFields()){
+                    /**转换一下date*/
+                    /**对非正常格式做一下数据处理**/
+                    JSONObject object = LuceneFormatter.convertObject(key,document);
+                    if(object==null){
+                        break;
+                    }else{
+                        obj.putAll(object);
+                    }
+                }
+            }else {
+                List<String> list1 =  LuceneFormatter.getCategoryAllField(category);
+                for(String key:list1){
+                    /**对非正常格式做一下数据处理**/
+                    JSONObject object = LuceneFormatter.convertObject(key,document);
+                    if(object==null){
+                        break;
+                    }else{
+                        obj.putAll(object);
+                    }
                 }
             }
-            resList.add(obj);
+            resList.add(LuceneFormatter.judgeShowDescription(obj));
+            //resList.add(obj);
         }
         if(multiReader!=null){
             multiReader.close();
@@ -571,13 +583,14 @@ public class LuceneReaderService {
         MultiFieldQueryParser multiFieldQueryParser=new MultiFieldQueryParser(Version.LUCENE_CURRENT,fields,ikAnalyzer);
         Query query=multiFieldQueryParser.parse(queryParser.getKeyword());
 
-        SortField  rank=new SortField("rank",SortField.Type.INT,false);
+      /*  SortField  rank=new SortField("rank",SortField.Type.INT,false);
         SortField  like=new SortField("like",SortField.Type.INT,true);
         SortField  date =new SortField("date",SortField.Type.LONG,true);
         SortField  focus =new SortField("focus",SortField.Type.INT,true);
         SortField  browse =new SortField("browse",SortField.Type.INT,true);
         SortField  comment =new SortField("comment",SortField.Type.INT,true);
-        Sort  sort=new Sort(rank,like,date,focus,browse,comment);
+        Sort  sort=new Sort(rank,like,date,focus,browse,comment);*/
+        Sort  sort= LuceneFormatter.getDefaultSort(queryParser.getCategory());
 
         TopFieldCollector collector =  TopFieldCollector.create(sort, 10000, true, true, false, false);
         //TopScoreDocCollector collector = TopScoreDocCollector.create(10000, false);
@@ -597,10 +610,40 @@ public class LuceneReaderService {
             obj=new JSONObject();
             int  index=doc.doc;
             Document document=indexSearcher.doc(index);
-            for(String key:LuceneFormatter.listFields()){
-                obj.put(key,document.get(key));
+            for(String string :SearchType.list()){
+                if(StringUtils.equals(string,SearchType.cnblog.getCategory())){
+                    for(String key: CnblogsFormatter.listFields()){
+                        /**对非正常格式做一下数据处理**/
+                        JSONObject object = LuceneFormatter.convertObject(key,document);
+                        if(object==null){
+                            break;
+                        }else{
+                            obj.putAll(object);
+                        }
+                    }
+                }else if(StringUtils.equals(string,SearchType.hotspot.getCategory())){
+                    for(String key: HotspotFormatter.listFields()){
+                        obj.put(key,document.get(key));
+                    }
+                }else if(StringUtils.equals(string,SearchType.life.getCategory())){
+                    for(String key: LifeFormatter.listFields()){
+                        obj.put(key,document.get(key));
+                    }
+                }else if(StringUtils.equals(string,SearchType.journey.getCategory())){
+                    for(String key: JourneyFormatter.listFields()){
+                        obj.put(key,document.get(key));
+                    }
+                }else if(StringUtils.equals(string,SearchType.reading.getCategory())){
+                    for(String key: ReadingFormatter.listFields()){
+                        obj.put(key,document.get(key));
+                    }
+                }else if(StringUtils.equals(string,SearchType.movie.getCategory())){
+                    for(String key: MovieFormatter.listFields()){
+                        obj.put(key,document.get(key));
+                    }
+                }
             }
-            resList.add(obj);
+            resList.add(LuceneFormatter.judgeShowDescription(obj));
         }
         if(multiReader!=null){
             multiReader.close();

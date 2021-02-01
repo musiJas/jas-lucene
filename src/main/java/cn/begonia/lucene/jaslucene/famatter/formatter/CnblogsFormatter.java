@@ -68,12 +68,15 @@ public enum  CnblogsFormatter {
           JSONObject json=new JSONObject();
          for(CnblogsFormatter  formatter:CnblogsFormatter.values()){
              // 对date做格式转换
-             if(StringUtils.equals(formatter.field,"date")){
+            /* if(StringUtils.equals(formatter.field,"date")){
                  Long  times=Long.parseLong(document.get("date"));
                  json.put(formatter.field,DateUtils.format(new Date(times)));
              }else {
-                 json.put(formatter.field,document.get(formatter.field));
-             }
+                 JSONObject object = LuceneFormatter.convertObject(formatter.field,document);
+                 json.putAll(object);
+                 //json.put(formatter.field,document.get(formatter.field));
+             }*/
+             json.putAll(LuceneFormatter.convertObject(formatter.field,document));
          }
         return json;
     }

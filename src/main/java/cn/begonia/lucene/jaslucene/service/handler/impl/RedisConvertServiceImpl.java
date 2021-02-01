@@ -40,6 +40,7 @@ public class RedisConvertServiceImpl implements DocumentConvert  {
             JSONObject obj=JSONObject.parseObject(String.valueOf(ty.getValue()));
             doc=new Document();
             doc.add(new Field("id",key, Field.Store.YES, Field.Index.NOT_ANALYZED));
+            doc.add(new Field("category",category, Field.Store.YES, Field.Index.NOT_ANALYZED));
             for(Map.Entry<String, Object> ob:obj.entrySet()){
                 //Field field = new TextField(ob.getKey(), String.valueOf(ob.getValue()), Field.Store.YES);
                 Field field =LuceneFormatter.initialFormatter(ob.getKey(),String.valueOf(ob.getValue()),category);

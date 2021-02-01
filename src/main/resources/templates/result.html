@@ -4,11 +4,14 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1"/>
     <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
     <title>BegoniaJas 搜索</title>
+    <link rel="shortcut icon" th:href="@{/pic/favicon.ico}"/>
+    <link rel="bookmark" th:href="@{/pic/favicon.ico}"/>
     <link rel="stylesheet" href="/static/css/s1764.css" type="text/css"/>
     <link rel="stylesheet" href="/static/css/r1763.css" type="text/css"/>
     <meta name="robots" content="noindex,nofollow"/>
+    <meta name="referrer" content="no-referrer" /><!--页面头部添加-->
     <meta name="apple-mobile-web-app-title" content="weather"/>
-    <link rel="shortcut icon" href="/assets/doge_ico.png" type="image/png"/>
+    <link rel="shortcut icon" href="/static/assets/doge_ico.png" type="image/png"/>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <meta name="HandheldFriendly" content="true"/>
     <meta name="apple-mobile-web-app-capable" content="no"/>
@@ -24,11 +27,12 @@
         </div>
         <div id="header" class="header cw">
             <div class="header__search-wrap">
-                <a tabindex="-1" href="/" class="header__logo-wrap js-header-logo"><span class="header__logo js-logo-ddg">DogeDoge</span></a>
+                <a tabindex="-1" th:href="@{/}"   class="header__logo-wrap js-header-logo"><span class="header__logo js-logo-ddg">DogeDoge</span></a>
                 <div class="header__content header__search">
-                    <form id="search_form" class="search--adv search--header js-search-form has-text" name="x" action="/search" method="GET">
+                    <form id="search_form" class="search--adv search--header js-search-form has-text" name="x" th:action="@{/search}" method="GET">
                         <input type="text" name="keyword" tabindex="1" autocomplete="off" id="search_form_input" class="search__input--adv js-search-input" th:value="${keyword}"  autocapitalize="off" autocorrect="off"/>
                         <input id="search_button" class="search__button js-search-button" type="submit" tabindex="2" value="S"/>
+                        <input type="text" name="category" tabindex="1"  style="display: none" autocomplete="off" id="search_form_category" class="search__input--adv js-search-input"  />
                         <input id="search_form_input_clear" class="search__clear js-search-clear" type="button" tabindex="3" value="X"/>
                         <div id="search__autocomplete" class="search__autocomplete" style="position: absolute; display: none;"></div>
                     </form>
@@ -37,12 +41,13 @@
             <div id="duckbar" class="zcm-wrap zcm-wrap--header is-noscript-hidden">
                 <div class="zcm">
                     <ul class="zcm__menu zcm__constant has-zci" id="duckbar_static">
-                        <li class="zcm__item"><a data-zci-link="web" class="zcm__link js-zci-link js-zci-link--web is-active" href="javascript:;">Web</a></li>
-                        <li class="zcm__item"><a data-zci-link="news" class="zcm__link js-zci-link js-zci-link--newsis-hidden" href="javascript:javascript:alert('coming soon.');">博客</a></li>
-                        <li class="zcm__item"><a data-zci-link="news" class="zcm__link js-zci-link js-zci-link--newsis-hidden" href="javascript:javascript:alert('coming soon.');">热点</a></li>
-                        <li class="zcm__item"><a data-zci-link="images" class="zcm__link js-zci-link js-zci-link--imagesis-hidden" href="javascript:javascript:alert('coming soon.');">图片</a></li>
-                        <li class="zcm__item"><a data-zci-link="videos" class="zcm__link js-zci-link js-zci-link--videosis-hidden" href="javascript:javascript:alert('coming soon.');">视频</a></li>
-                        <li class="zcm__item"><a data-zci-link="news" class="zcm__link js-zci-link js-zci-link--newsis-hidden" href="javascript:javascript:alert('coming soon.');">新闻</a></li>
+                        <li class="zcm__item"><a data-zci-link="" class="zcm__link js-zci-link js-zci-link--web " th:classappend="${category==null}?'is-active':''"   href="javascript:;">全部</a></li>
+                        <li class="zcm__item"><a data-zci-link="cnblogs" class="zcm__link js-zci-link js-zci-link--newsis-hidden" th:classappend="${category =='cnblogs'}?'is-active':''" href="javascript:;">博客</a></li>
+                        <li class="zcm__item"><a data-zci-link="hotspot" class="zcm__link js-zci-link js-zci-link--newsis-hidden" th:classappend="${category =='hotspot'}?'is-active':''" href="javascript:;">热点</a></li>
+                        <li class="zcm__item"><a data-zci-link="life" class="zcm__link js-zci-link js-zci-link--imagesis-hidden" th:classappend="${category=='life'}?'is-active':''" href="javascript:;">生活</a></li>
+                        <li class="zcm__item"><a data-zci-link="reading" class="zcm__link js-zci-link js-zci-link--videosis-hidden" th:classappend="${category=='reading'}?'is-active':''" href="javascript:;">读书</a></li>
+                        <li class="zcm__item"><a data-zci-link="journey" class="zcm__link js-zci-link js-zci-link--newsis-hidden" th:classappend="${category=='journey'}?'is-active':''" href="javascript:;">旅行</a></li>
+                        <li class="zcm__item"><a data-zci-link="movie" class="zcm__link js-zci-link js-zci-link--newsis-hidden" th:classappend="${category=='movie'}?'is-active':''" href="javascript:;">电影</a></li>
                     </ul>
                     <ul class="zcm__menu zcm__dynamic has-zci is-hidden diy" id="duckbar_new">
                         <span id="duckbar_dynamic_sep" class="zcm__sep--h sep--before"></span>
@@ -69,7 +74,7 @@
                                 </div>
                                 <a class="dropdown__button dropdown__button js-dropdown-button">中文</a>
                             </div>
-                            <div class="resultCounter">约 939,000,000 条结果<nobr>（0.34 秒）&nbsp;</nobr></div>						</div>
+                            <div class="resultCounter" th:text="' 约 '+${total}+' 条结果 ('+${time}+'秒）&nbsp;'">约 939,000,000 条结果<nobr th:text="'（'+${time}+'秒）&nbsp;'">（0.34 秒）&nbsp;</nobr></div>						</div>
                     </div>
                     <style>
                         .in_result_banner {
@@ -134,22 +139,25 @@
                     <div id="links" class="results js-results">
                         <div th:each="user:${data}" class="result results_links_deep highlight_d result--url-above-snippet" data-domain="www.baidu.com" data-hostname="www.baidu.com" data-nir="1">
                             <div class="result__body links_main links_deep">
-                                <h2 class="result__title"><a class="result__a" rel="noopener origin" th:href="${user.url}"  target="_blank"><em th:text="${user.title}"></em></a></h2>
+                                <h2 class="result__title"><a class="result__a" rel="noopener origin" th:href="${user.get('url')} == null?${user.info}:${user.url}"  target="_blank"><em th:text="${user.title}"></em></a></h2>
                                 <div class="result__extras js-result-extras">
                                     <div class="result__extras__url">
-                                        <span class="result__icon "><a rel="noopener origin"  th:href="${user.url}" title="只看 www.baidu.com" class="js-result-extras-site_search"><img class="result__icon__img lazyload-icons lazyload " data-src="/favicon/www.baidu.com.ico" height="16" width="16" title="只看 www.baidu.com" src="data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw=="/></a></span><a href="/rd/rxk5i5ODWK3b7Sj7JyHk9wsxQ%2FZ8frgJIwBbOuSoezI%3D" rel="noopener origin" target="_blank" class="result__url js-result-extras-url"><span class="result__url__domain" th:text="${user.url}"></span><span class="result__url__full"></span></a>
+                                        <span class="result__icon "><a rel="noopener origin"  th:href="${user.get('url')} == null?${user.info}:${user.url}" title="只看 www.baidu.com" class="js-result-extras-site_search"><img class="result__icon__img lazyload-icons lazyload " data-src="/static/favicon/www.begonia.com.ico" height="16" width="16"  src="data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw=="/></a></span><a th:href="${user.get('url')} == null?${user.info}:${user.url}"  rel="noopener origin" target="_blank" class="result__url js-result-extras-url"><span class="result__url__domain" th:text="${user.get('url')} == null?${user.info}:${user.url}"></span><span class="result__url__full"></span></a>
                                     </div>
                                 </div>
-                                <div class="result__snippet js-result-snippet" th:text="${user.content}">
-                                    <!--<div class="in_result_banner">
-                                        <img class="lazyload" src="https://rmt.dogedoge.com/rmt/Q6YR04jWljFqDW0uVNedlqg4EZxSwZ7Zsl5LVwo0ZROYMaqbX89W4rM-ig?w=212&h=130"/>
-                                    </div>-->
-                                    <!--<em>百度</em>一下，你就知道 ... 输入法-~-->								</div>
+                                <div class="result__snippet js-result-snippet" th:if="${user.get('show')}" >
+                                    <div class="in_result_banner" th:if="${user.get('display')}" >
+                                        <img class="lazyload"  th:src="${user.get('avatar')} ==null?${user.get('img')}:${user.get('avatar')}" />
+                                    </div>
+                                   <!-- <em>百度</em>一下，你就知道 ... 输入法-~&ndash;&gt;		-->
+                                    <div th:text="${user.get('content')} ==null?${user.get('detail')}:${user.content}">
+                                    </div>
+                                </div>
                                 <!--  -->
                             </div>
                         </div>
                         <div class="result result--more" style="float:right; width:150px; display:inline-block;" id="rld-2">
-                            <a href="?q=%E7%99%BE%E5%BA%A6&amp;p=2" class="result--more__btn btn btn--full">下一页 &gt;&gt;</a>
+                            <a th:href="${href}"  id="nextButton" class="result--more__btn btn btn--full">下一页 &gt;&gt;</a>
                         </div>
                     </div>
                 </div>
@@ -167,13 +175,20 @@
     /*<![CDATA[*/
     $(document).ready(function(){
         $('#search_form_input').on('input propertychange', function() {
-            do_sugg(this);
+            //do_sugg(this);
         });
         $('#search_form_input').focus(function () {
             $('#search_form').addClass("search--focus");
             $('html').addClass("has-search-focus");
-            do_sugg(this);
+            //do_sugg(this);
         });
+        $(".zcm__link").click(function(){
+            $(".zcm__link").removeClass("is-active");
+            $(this).addClass("is-active");
+            var value=$(this).attr("data-zci-link");
+            $("#search_form_category").val(value);
+        })
+
         $('#search_form_input_clear').click(function () {
             $('#search_form_input').val('').focus();
             $('#search_form').removeClass("has-text");
@@ -406,20 +421,32 @@
     _paq.push(['trackPageView']);
     _paq.push(['enableLinkTracking']);
     (function() {
-        var u="/data/";
+      /*  var u="/data/";
         _paq.push(['setTrackerUrl', u+'up']);
         _paq.push(['setSiteId', '1']);
         var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0];
-        g.type='text/javascript'; g.async=true; g.defer=true; g.src=u+'js'; s.parentNode.insertBefore(g,s);
+        g.type='text/javascript'; g.async=true; g.defer=true; g.src=u+'js'; s.parentNode.insertBefore(g,s);*/
     })();
 </script>
 <script>
     window.ga_tid = "UA-120209922-1"; // GA-trackerID of your site.
     (function() {
-        var dga = document.createElement("script");
+      /*  var dga = document.createElement("script");
         dga.src = "https://rmt.dogedoge.com/fetch/public/ga.js";
         var s = document.getElementsByTagName("script")[0];
-        s.parentNode.insertBefore(dga, s);
+        s.parentNode.insertBefore(dga, s);*/
+
+     /* $("#search_form_input").change(function(target){
+          var value=$(this).val();
+          var href= $("#nextButton").attr("href");
+          $("#nextButton").attr("href","");
+          var prefix=href.substring(0,3);
+          var suffix=href.substring(href.indexOf("p=")-1,href.length);
+          href=prefix+value+suffix;
+          console.log(href);
+          $("#nextButton").attr("href",href);
+      })*/
+
     })();
 </script>
 </body>
