@@ -88,9 +88,9 @@ public class DateUtils {
 
     public static void main(String[] args) throws ParseException {
 
-        System.out.println(510/1000f);
+       // System.out.println(510/1000f);
 
-        //System.out.println(getDefaultDate());
+        System.out.println(getDefaultDate());
 
        // System.out.println(new DateUtils().format(new Date()));
         //System.out.println(DateUtils.parse("2020-08-18"));

@@ -1,5 +1,6 @@
 package cn.begonia.lucene.jaslucene.common;
 
+import cn.begonia.lucene.jaslucene.famatter.formatter.WeiboFormatter;
 import com.alibaba.fastjson.JSONObject;
 
 import java.util.*;
@@ -12,6 +13,7 @@ import java.util.*;
 public enum SearchType {
     hotspot("hotspot","热点数据"),
     cnblog("cnblogs","博客类型"),
+    weibo("weibo","微博"),
     life("life","生活类-包含常识等"),
     reading("reading","阅读指导"),
     movie("movie","高分movie指导"),

@@ -73,6 +73,7 @@ public class RedisConvertServiceImpl implements DocumentConvert  {
         if(StringUtils.isNotEmpty(keys)){
             Map<Object, Object>  map=cacheUtils.hgetAll(keys);
             createIndex(indexWriter,map,attribute.getCategory());
+            System.out.println("create index successful by total:"+map.size());
         }
     }
 }

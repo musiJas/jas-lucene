@@ -1,9 +1,6 @@
 package cn.begonia.lucene.jaslucene.common;
 
-import cn.begonia.lucene.jaslucene.famatter.formatter.CnblogsFormatter;
-import cn.begonia.lucene.jaslucene.famatter.formatter.HotspotFormatter;
-import cn.begonia.lucene.jaslucene.famatter.formatter.MovieFormatter;
-import cn.begonia.lucene.jaslucene.famatter.formatter.ReadingFormatter;
+import cn.begonia.lucene.jaslucene.famatter.formatter.*;
 
 /**
  * @author begonia_chen
@@ -17,7 +14,8 @@ public enum   CacheType {
      life("life","生活类-包含常识等", CacheType.class),
      reading("reading","阅读指导", ReadingFormatter.class),
      movie("movie","高分movie指导", MovieFormatter.class),
-     journey("journey","旅行指导",CacheType.class);
+     weibo("weibo","微博", WeiboFormatter.class),
+     journey("journey","旅行指导",JourneyFormatter.class);
     private  String  key;
     private  String  description;
     private  Class  cls;

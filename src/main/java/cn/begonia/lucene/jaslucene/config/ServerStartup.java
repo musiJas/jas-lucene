@@ -16,14 +16,14 @@ import java.io.File;
 @Slf4j
 @Component
 public class ServerStartup implements ApplicationContextAware, CommandLineRunner {
-    private  static ApplicationContext applicationContext;
+    private static ApplicationContext applicationContext;
 
     @Override
     public void run(String... strings) throws Exception {
         log.info("ServerStartup run service......");
         //String proxy=ServerStartup.getApplicationContext().getEnvironment().getProperty("server.proxy");
         /** 项目启动就初始化inderWriter**/
-        String index=applicationContext.getEnvironment().getProperty("begonia.lucene.indexPath");
+        String index = applicationContext.getEnvironment().getProperty("begonia.lucene.indexPath");
         /*for(CacheType type:CacheType.values()){
             if(checkFile(index,type.getKey())){
                 ResourceAttribute  rs= ResourceAttribute.builder().indexPath(index).category(type.getKey()).build();
@@ -35,16 +35,16 @@ public class ServerStartup implements ApplicationContextAware, CommandLineRunner
         }*/
     }
 
-    public  static  boolean  checkFile(String  root,String  category){
-        File  file=new File(root+File.separator+category);
-        return  file.exists();
+    public static boolean checkFile(String root, String category) {
+        File file = new File(root + File.separator + category);
+        return file.exists();
     }
 
     public static void main(String[] args) {
-        String  root="D:\\data\\index";
-        String  category="life";
+        String root = "D:\\data\\index";
+        String category = "life";
 
-        System.out.println(checkFile(root,category));
+        System.out.println(checkFile(root, category));
 
 
     }
@@ -52,11 +52,11 @@ public class ServerStartup implements ApplicationContextAware, CommandLineRunner
 
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-            this.applicationContext=applicationContext;
+        this.applicationContext = applicationContext;
     }
 
-    public static ApplicationContext getApplicationContext(){
-        return   applicationContext;
+    public static ApplicationContext getApplicationContext() {
+        return applicationContext;
     }
 
 }

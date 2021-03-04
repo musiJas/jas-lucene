@@ -99,6 +99,8 @@ public enum LuceneFormatter  {
             return    LifeFormatter.resolveDocument(document);
         }else if(StringUtils.equals(CacheType.journey.getKey(),category)){
             return    JourneyFormatter.resolveDocument(document);
+        }else if(StringUtils.equals(CacheType.weibo.getKey(),category)){
+            return    WeiboFormatter.resolveDocument(document);
         }
         return null;
     }
@@ -121,7 +123,10 @@ public enum LuceneFormatter  {
             String[] arr=LifeFormatter.listFields();
             list=Arrays.asList(arr);
         }else if(StringUtils.equals(CacheType.journey.getKey(),category)){
-            String[] arr=LifeFormatter.listFields();
+            String[] arr=JourneyFormatter.listFields();
+            list=Arrays.asList(arr);
+        }else if(StringUtils.equals(CacheType.weibo.getKey(),category)){
+            String[] arr=WeiboFormatter.listFields();
             list=Arrays.asList(arr);
         }
         return list;
@@ -141,6 +146,8 @@ public enum LuceneFormatter  {
             return    LifeFormatter.getDefaultSort();
         }else if(StringUtils.equals(CacheType.journey.getKey(),category)){
             return    JourneyFormatter.getDefaultSort();
+        }else if(StringUtils.equals(CacheType.weibo.getKey(),category)){
+            return    WeiboFormatter.getDefaultSort();
         }else {
             /**默认的排序规则**/
             SortField  date =new SortField("date",SortField.Type.LONG,true);
@@ -166,6 +173,8 @@ public enum LuceneFormatter  {
             return    LifeFormatter.initialFormatter(field,value);
         }else if(StringUtils.equals(CacheType.journey.getKey(),category)){
             return    JourneyFormatter.initialFormatter(field,value);
+        }else if(StringUtils.equals(CacheType.weibo.getKey(),category)){
+            return    WeiboFormatter.initialFormatter(field,value);
         }
         return null;
     }

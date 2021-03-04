@@ -1,6 +1,7 @@
 package cn.begonia.lucene.jaslucene;
 
 import org.springframework.boot.SpringApplication;
+import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -14,7 +15,10 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 public class JasLuceneApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(JasLuceneApplication.class, args);
+        SpringApplication app = new SpringApplication(JasLuceneApplication.class);
+        app.setWebApplicationType(WebApplicationType.REACTIVE);
+        app.run(args);
+        //SpringApplication.run(JasLuceneApplication.class, args);
     }
 
 }
