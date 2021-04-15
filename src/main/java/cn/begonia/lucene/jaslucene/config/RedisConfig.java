@@ -9,7 +9,6 @@ import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.interceptor.KeyGenerator;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.redis.cache.RedisCacheConfiguration;
 import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -73,8 +72,8 @@ public class RedisConfig  extends CachingConfigurerSupport {
      */
     @Bean
     public CacheManager cacheManager(RedisTemplate redisTemplate) {
-        //RedisCacheManager rcm =new RedisCacheManager(redisTemplate);
-        RedisCacheManager rcm=RedisCacheManager.create(redisTemplate.getConnectionFactory());
+        RedisCacheManager rcm =new RedisCacheManager(redisTemplate);
+        //RedisCacheManager rcm=RedisCacheManager.create(redisTemplate.getConnectionFactory());
         //按需求设置自己需要的    缓存名字 和 对应的失效时间
         //可以不要
         Map<String,Long> map = new HashMap<>();

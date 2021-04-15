@@ -1,8 +1,10 @@
 package cn.begonia.lucene.jaslucene.demo;
 
+import cn.begonia.lucene.jaslucene.common.CacheType;
+import cn.begonia.lucene.jaslucene.famatter.LuceneFormatter;
 import cn.begonia.lucene.jaslucene.famatter.parser.RangeParser;
 import cn.begonia.lucene.jaslucene.util.DateUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.ar.ArabicAnalyzer;
 import org.apache.lucene.analysis.core.SimpleAnalyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
@@ -12,6 +14,7 @@ import org.apache.lucene.queryparser.classic.MultiFieldQueryParser;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.*;
+import org.apache.lucene.search.highlight.*;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.Version;
@@ -19,9 +22,11 @@ import org.wltea.analyzer.lucene.IKAnalyzer;
 
 import java.io.*;
 
+
+@SuppressWarnings("all")
 public class demo2 {
 
-    private  static  String  indexStaticPath="D:\\data\\index\\hotspot";
+    private  static  String  indexStaticPath="D:\\data\\index\\movie";
 
 
     private  static  String  indexStaticRoot="D:\\data\\index\\";
@@ -35,12 +40,12 @@ public class demo2 {
 
         long  startTime= System.currentTimeMillis();
         String contentTitle="title";
-        String  content="特朗普";
+        String  content="特工";
         //String  content="title:codermy";
         String [] multi={"title","content","auth","focus"};
-        //multiFieldQueryParser(multi,content);
+        multiFieldQueryParser(multi,content);
         //queryStringResult(contentTitle,content);
-        queryIndex(index,"拳头");
+        //queryIndex(index,"拳头");
         // queryNumericResult(key,value);
         /*try {
             createIndex(index,resource);
@@ -63,7 +68,9 @@ public class demo2 {
         MultiFieldQueryParser multiFieldQueryParser=new MultiFieldQueryParser(Version.LUCENE_CURRENT,fields,ikAnalyzer);
         try {
             Query query=multiFieldQueryParser.parse(content);
-            executeQuery(query);
+            //executeQuery(query);
+            executePageQuery(query);
+
         } catch (ParseException e) {
             e.printStackTrace();
         }
@@ -82,6 +89,57 @@ public class demo2 {
         executeQuery(query);
         return "";
     }
+
+    @SuppressWarnings("all")
+    public  static  void  executePageQuery(Query query){
+        try {
+            Directory directory= FSDirectory.open(new File(indexStaticPath));
+            DirectoryReader dr=DirectoryReader.open(directory);
+            IndexSearcher indexSearcher=new IndexSearcher(dr);
+
+            Sort sort = LuceneFormatter.getDefaultSort(CacheType.movie.getKey());
+            TopFieldCollector collector = TopFieldCollector.create(sort, 10000, true, true, false, false);
+
+            indexSearcher.search(query, collector);
+            TopDocs docs = collector.topDocs(0, 30);
+
+           // TopDocs docs= indexSearcher.search(query,10000);
+            System.out.println("docs.size="+docs.scoreDocs.length);
+            for(ScoreDoc doc:docs.scoreDocs){
+                Explanation  explanation=indexSearcher.explain(query,doc.doc);
+                System.out.println(explanation.toString());
+                int  index=doc.doc;
+                Document document=indexSearcher.doc(index);
+                String titles=document.get("title");
+                System.out.println("title="+titles);
+                String urls=document.get("url");
+                System.out.println("url="+urls);
+                String auths=document.get("auth");
+                System.out.println("auth="+auths);
+                String dates=document.get("date");
+                System.out.println("date="+ DateUtils.parseTimeMillis(dates));
+                String  digs=document.get("like");
+                System.out.println("dig="+digs);
+                String  comments=document.get("comment");
+                System.out.println("comment="+comments);
+                String  browse=document.get("browse");
+                System.out.println("browse="+browse);
+                String  content=document.get("content");
+                System.out.println("content="+content);
+                String  img=document.get("img");
+                System.out.println("img="+img);
+            }
+            dr.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        System.out.println("查找完成");
+
+
+
+    }
+
+
 
     public static  void  executeQuery(Query query){
         try {
@@ -150,16 +208,25 @@ public class demo2 {
             bq.add(query1, BooleanClause.Occur.MUST);
             TopDocs docs= indexSearcher.search(query,10);
             System.out.println("docs.size="+docs.scoreDocs.length);
+
+
             for(ScoreDoc doc:docs.scoreDocs){
                 Explanation  explanation=indexSearcher.explain(query,doc.doc);
                 System.out.println(explanation.toString());
                 int  index=doc.doc;
                 Document document=indexSearcher.doc(index);
+
+
                 String titles=document.get("title");
+                String  highlight= displayHtmlHighlight(bq,ik,"title",titles,200);
+                System.out.println("highlight=>"+highlight);
+
+
                 System.out.println("title="+titles);
                 String detail=document.get("detail");
                 System.out.println("detail="+detail);
-
+                String  details= displayHtmlHighlight(bq,ik,"detail",detail,200);
+                System.out.println("highlight=>"+details);
 
                 String urls=document.get("url");
                 System.out.println("url="+urls);
@@ -186,6 +253,26 @@ public class demo2 {
         return "";
     }
 
+
+
+    /**
+     * 获取高亮显示结果的html代码
+     * @param query 查询
+     * @param analyzer 分词器
+     * @param fieldName 域名
+     * @param fieldContent 域内容
+     * @param fragmentSize 结果的长度（不含html标签长度）
+     * @return 结果（一段html代码）
+     * @throws IOException
+     */
+    static String displayHtmlHighlight(Query query, Analyzer analyzer, String fieldName, String fieldContent, int fragmentSize) throws IOException, InvalidTokenOffsetsException
+    {
+        //创建一个高亮器
+        Highlighter highlighter = new  Highlighter(new SimpleHTMLFormatter("<font color='red'>", "</font>"), new QueryScorer(query));
+        Fragmenter fragmenter = new SimpleFragmenter(fragmentSize);
+        highlighter.setTextFragmenter(fragmenter);
+        return highlighter.getBestFragment(analyzer, fieldName, fieldContent);
+    }
 
 
     public   static  void  createIndex(String indexPath,String  resourcePath) throws IOException {

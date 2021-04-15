@@ -19,7 +19,7 @@ public enum MovieFormatter {
     title("title", TextField.class, Field.Store.YES,Field.Index.ANALYZED,5.0f),
     date("date", LongField.class,Field.Store.YES,Field.Index.ANALYZED,1.0f),
     img("img",TextField.class,Field.Store.YES, Field.Index.NOT_ANALYZED,1.0f),
-    score("score",StringField.class,Field.Store.YES, Field.Index.NOT_ANALYZED,1.0f),
+    score("score",StringField.class,Field.Store.YES, Field.Index.ANALYZED_NO_NORMS,1.0f),
     star("star",StringField.class,Field.Store.YES, Field.Index.NOT_ANALYZED,1.0f),
     release("release",StringField.class,Field.Store.YES, Field.Index.NOT_ANALYZED,1.0f),
     duration("duration",TextField.class,Field.Store.YES, Field.Index.NOT_ANALYZED,3.0f),
@@ -89,9 +89,9 @@ public enum MovieFormatter {
 
     /** 获取排序规则 **/
     public  static Sort getDefaultSort(){
-        SortField score=new SortField("score",SortField.Type.INT,true);
+        SortField score=new SortField("score",SortField.Type.STRING,true);
         SortField  date =new SortField("date",SortField.Type.LONG,true);
-        Sort  sort=new Sort(date,score);
+        Sort  sort=new Sort(date);
         return sort;
     }
 

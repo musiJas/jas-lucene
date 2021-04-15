@@ -1,19 +1,10 @@
 package cn.begonia.lucene.jaslucene.demo.webflux;
 
-import cn.begonia.lucene.jaslucene.common.Result;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-
-import java.util.ArrayList;
-import java.util.List;
-
-@RestController
+//@RestController
 public class TestController {
 
 
-    @RequestMapping("/toJson")
+    /*@RequestMapping("/toJson")
     public Mono<Result>   toJson(){
         return  Mono.just(Result.isOk());
     }
@@ -39,6 +30,5 @@ public class TestController {
     public  Mono<Void>   toEmpty(){
         return Mono.empty();
     }
-
-
+*/
 }

@@ -19,7 +19,7 @@ public enum ReadingFormatter {
     title("title", TextField.class, Field.Store.YES,Field.Index.ANALYZED,5.0f),
     date("date", LongField.class,Field.Store.YES,Field.Index.ANALYZED,1.0f),
     img("img",TextField.class,Field.Store.YES, Field.Index.NOT_ANALYZED,1.0f),
-    score("score",StringField.class,Field.Store.YES, Field.Index.NOT_ANALYZED,1.0f),
+    score("score",StringField.class,Field.Store.YES, Field.Index.ANALYZED_NO_NORMS,1.0f),
     info("info",TextField.class,Field.Store.YES, Field.Index.ANALYZED_NO_NORMS,1.0f),
     author("author",TextField.class,Field.Store.YES, Field.Index.NOT_ANALYZED,1.0f),
     detail("detail",TextField.class,Field.Store.YES, Field.Index.NOT_ANALYZED,1.0f),
@@ -82,7 +82,7 @@ public enum ReadingFormatter {
 
     /** 获取排序规则 **/
     public  static Sort getDefaultSort(){
-        SortField score=new SortField("score",SortField.Type.INT,true);
+        SortField score=new SortField("score",SortField.Type.STRING,true);
         SortField  date =new SortField("date",SortField.Type.LONG,true);
         Sort  sort=new Sort(date,score);
         return sort;

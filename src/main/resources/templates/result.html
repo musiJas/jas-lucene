@@ -16,7 +16,7 @@
     <meta name="HandheldFriendly" content="true"/>
     <meta name="apple-mobile-web-app-capable" content="no"/>
     <link title="DogeDoge" type="application/opensearchdescription+xml" rel="search" href="/opensearch.xml"/>
-    <link href="/static/css/index.css" rel="stylesheet"/>
+    <link th:href="@{/static/css/index.css}" rel="stylesheet"/>
     <script src="/static/js/jquery.min.js"></script>
     <script src="/static/js/index.js"></script>
 </head>
@@ -140,7 +140,7 @@
                     <div id="links" class="results js-results">
                         <div th:each="user:${data}" class="result results_links_deep highlight_d result--url-above-snippet" data-domain="www.baidu.com" data-hostname="www.baidu.com" data-nir="1">
                             <div class="result__body links_main links_deep">
-                                <h2 class="result__title"><a class="result__a" rel="noopener origin" th:href="${user.get('url')} == null?${user.info}:${user.url}"  target="_blank"><em th:text="${user.title}"></em></a></h2>
+                                <h2 class="result__title"><a class="result__a" rel="noopener origin" th:href="${user.get('url')} == null?${user.info}:${user.url}"  target="_blank"><em th:utext="${user.title}"></em></a></h2>
                                 <div class="result__extras js-result-extras">
                                     <div class="result__extras__url">
                                         <span class="result__icon "><a rel="noopener origin"  th:href="${user.get('url')} == null?${user.info}:${user.url}" title="只看 www.baidu.com" class="js-result-extras-site_search"><img class="result__icon__img lazyload-icons lazyload " data-src="/static/favicon/www.begonia.com.ico" height="16" width="16"  src="data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw=="/></a></span><a th:href="${user.get('url')} == null?${user.info}:${user.url}"  rel="noopener origin" target="_blank" class="result__url js-result-extras-url"><span class="result__url__domain" th:text="${user.get('url')} == null?${user.info}:${user.url}"></span><span class="result__url__full"></span></a>
@@ -151,7 +151,7 @@
                                         <img class="lazyload"  th:src="${user.get('avatar')} ==null?${user.get('img')}:${user.get('avatar')}" />
                                     </div>
                                    <!-- <em>百度</em>一下，你就知道 ... 输入法-~&ndash;&gt;		-->
-                                    <div th:text="${user.get('content')} ==null?${user.get('detail')}:${user.content}">
+                                    <div th:utext="${user.get('content')} ==null?${user.get('detail')}:${user.content}">
                                     </div>
                                 </div>
                                 <!--  -->
@@ -172,6 +172,7 @@
         </div>
     </div>
 </div>
+<!--dd4b39-->
 <script type="text/javascript">
     /*<![CDATA[*/
     $(document).ready(function(){
